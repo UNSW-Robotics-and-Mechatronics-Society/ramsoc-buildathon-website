@@ -19,6 +19,7 @@ const Path = {
     AdminTeams: "/2026/admin/teams",
     AdminIndividuals: "/2026/admin/individuals",
     AdminTasks: "/2026/admin/tasks",
+    AdminTimeline: "/2026/admin/timeline",
     AdminSettings: "/2026/admin/settings",
     AdminUi: "/2026/admin/ui",
   },

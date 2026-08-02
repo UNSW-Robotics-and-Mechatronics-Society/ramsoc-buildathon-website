@@ -1,9 +1,11 @@
 /**
  * Buildathon 2026 runs across the first six weeks of term.
  *
- * Sessions marked TBD are still being locked in with the venue, the admin
- * settings panel does not drive this yet, so update the entries here as rooms
- * are confirmed.
+ * This is the FALLBACK copy of the schedule. The live one lives in the
+ * timeline_weeks / timeline_sessions tables and is edited from
+ * /2026/admin/timeline; getTimeline() only falls back here when the table is
+ * empty or unreachable. Keep it roughly in step, but edit the real schedule in
+ * the admin console.
  */
 
 export type TimelineSession = {
@@ -11,6 +13,8 @@ export type TimelineSession = {
   location: string;
   time: string;
 };
+
+export type TimelineAccent = "azure" | "yellow" | "orange" | "green" | "red";
 
 export type TimelineWeek = {
   week: number;
@@ -20,7 +24,7 @@ export type TimelineWeek = {
   summary: string;
   sessions: TimelineSession[];
   /** LEGO accent colour token used for the week's brick. */
-  accent: "azure" | "yellow" | "orange" | "green" | "red";
+  accent: TimelineAccent;
 };
 
 export const TIMELINE: TimelineWeek[] = [

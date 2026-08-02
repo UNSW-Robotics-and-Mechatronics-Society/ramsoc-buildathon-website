@@ -169,6 +169,74 @@ values (
   '2026-10-05T23:59:59+11:00'
 );
 
+-- ---------------------------------------------------------------- timeline --
+-- The public schedule, editable from /2026/admin/timeline. Rooms and times are
+-- still being confirmed with the venue, so organisers need to change these
+-- without a redeploy.
+
+create table timeline_weeks (
+  id               uuid primary key default gen_random_uuid(),
+  competition_year integer not null default 2026,
+  week             integer not null,
+  -- Display string rather than a date range: entries read "22 - 23 Sep" and
+  -- some weeks are a single day.
+  dates            text not null,
+  title            text not null,
+  summary          text,
+  accent           text not null default 'azure'
+                     check (accent in ('azure', 'yellow', 'orange', 'green', 'red')),
+  created_at       timestamptz not null default now(),
+  updated_at       timestamptz not null default now(),
+  unique (competition_year, week)
+);
+
+create table timeline_sessions (
+  id       uuid primary key default gen_random_uuid(),
+  week_id  uuid not null references timeline_weeks (id) on delete cascade,
+  position integer not null default 0,
+  day      text not null,
+  location text not null,
+  "time"   text not null
+);
+
+create index timeline_sessions_week_id_idx on timeline_sessions (week_id, position);
+
+-- Seed with the published 2026 schedule.
+with seeded as (
+  insert into timeline_weeks (week, dates, title, summary, accent)
+  values
+    (1, '15 Sep', 'Introduction',
+     'Kick-off night. Meet the organisers, get the brief, and pick up your kit.', 'azure'),
+    (2, '22 - 23 Sep', 'CAD',
+     'Designing parts for 3D printing and laser cutting, from sketch to printable file.', 'yellow'),
+    (3, '29 - 30 Sep', 'ESP32 + PCB',
+     'Microcontroller programming and an intro to laying out your own circuit board.', 'orange'),
+    (4, '6 - 7 Oct', 'Build Session',
+     'Open makerspace time with mentors on hand.', 'green'),
+    (5, '13 - 14 Oct', 'Build Session',
+     'Last full week of build time before presentations.', 'green'),
+    (6, '23 Oct', 'Closing Presentations',
+     'Show the judges what you built. Prizes announced on the night.', 'red')
+  returning id, week
+)
+insert into timeline_sessions (week_id, position, day, location, "time")
+select seeded.id, s.position, s.day, s.location, s.time
+from seeded
+join (
+  values
+    (1, 0, 'Tuesday',   'MCIC',             '6:00 - 8:00pm'),
+    (2, 0, 'Tuesday',   'TBC',              'TBC'),
+    (2, 1, 'Wednesday', 'TBC',              'TBC'),
+    (3, 0, 'Tuesday',   'MCIC',             '6:00 - 8:00pm'),
+    (3, 1, 'Wednesday', 'MCIC',             '6:00 - 8:00pm'),
+    (3, 2, 'Friday',    'TBC',              'TBC'),
+    (4, 0, 'Tuesday',   'MCIC Makerspace',  '6:00 - 8:00pm'),
+    (4, 1, 'Wednesday', 'MCIC Makerspace',  '6:00 - 8:00pm'),
+    (5, 0, 'Tuesday',   'MCIC Makerspace',  '6:00 - 8:00pm'),
+    (5, 1, 'Wednesday', 'MCIC Makerspace',  '6:00 - 8:00pm'),
+    (6, 0, 'Friday',    'TBC',              '5:00 - 8:30pm')
+) as s(week, position, day, location, time) on s.week = seeded.week;
+
 -- --------------------------------------------------------------- updated_at --
 
 create or replace function set_updated_at()
@@ -205,5 +273,7 @@ alter table team_members     enable row level security;
 alter table payments         enable row level security;
 alter table error_logs       enable row level security;
 alter table admin_tasks      enable row level security;
+alter table timeline_weeks    enable row level security;
+alter table timeline_sessions enable row level security;
 alter table task_completions enable row level security;
 alter table app_config       enable row level security;

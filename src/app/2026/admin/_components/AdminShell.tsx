@@ -11,6 +11,7 @@ const tabs = [
   { label: "Teams", href: Path[2026].AdminTeams },
   { label: "Individuals", href: Path[2026].AdminIndividuals },
   { label: "Tasks", href: Path[2026].AdminTasks },
+  { label: "Timeline", href: Path[2026].AdminTimeline },
   { label: "Settings", href: Path[2026].AdminSettings },
   { label: "UI", href: Path[2026].AdminUi },
 ];

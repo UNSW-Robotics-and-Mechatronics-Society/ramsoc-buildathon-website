@@ -1,4 +1,4 @@
-import { TIMELINE } from "@/app/2026/_data/timeline";
+import { getTimeline } from "@/app/2026/_actions/timeline";
 
 const ACCENT_BG: Record<string, string> = {
   azure: "bg-lego-azure",
@@ -16,7 +16,9 @@ const ACCENT_TEXT: Record<string, string> = {
   red: "text-lego-red",
 };
 
-export default function Timeline() {
+export default async function Timeline() {
+  const timeline = await getTimeline();
+
   return (
     <section id="timeline" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
@@ -28,7 +30,7 @@ export default function Timeline() {
         </p>
 
         <ol className="space-y-4">
-          {TIMELINE.map((week) => (
+          {timeline.map((week) => (
             <li
               key={week.week}
               className="bg-blueprint-900/70 border-grid-major overflow-hidden rounded-xl border"

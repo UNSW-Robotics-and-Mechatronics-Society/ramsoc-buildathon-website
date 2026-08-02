@@ -10,7 +10,10 @@ import type {
   TeamMember,
   TeamWithMembers,
 } from "@/app/_types/registration";
-import type { AdminTask } from "@/app/2026/admin/_utils/types";
+import type {
+  AdminTask,
+  AdminTimelineWeek,
+} from "@/app/2026/admin/_utils/types";
 
 import {
   MEMBER_LIMITS,
@@ -23,6 +26,7 @@ import AdminLoginForm from "@/app/2026/admin/_components/AdminLoginForm";
 import TeamsTable from "@/app/2026/admin/_components/TeamsTable";
 import IndividualsTable from "@/app/2026/admin/_components/IndividualsTable";
 import TasksTable from "@/app/2026/admin/_components/TasksTable";
+import TimelineEditor from "@/app/2026/admin/_components/TimelineEditor";
 import {
   ActionButton,
   Alert,
@@ -399,6 +403,56 @@ const adminTasks: AdminTask[] = [
   },
 ];
 
+/** Two weeks of the schedule, one of them still waiting on a room. */
+const adminTimeline: AdminTimelineWeek[] = [
+  {
+    id: "week-1",
+    week: 1,
+    dates: "15 Sep",
+    title: "Introduction",
+    summary:
+      "Kick-off night. Meet the organisers, get the brief, and pick up your kit.",
+    accent: "azure",
+    sessions: [
+      {
+        id: "sess-1",
+        week_id: "week-1",
+        position: 0,
+        day: "Tuesday",
+        location: "MCIC",
+        time: "6:00 - 8:00pm",
+      },
+    ],
+  },
+  {
+    id: "week-2",
+    week: 2,
+    dates: "22 - 23 Sep",
+    title: "CAD",
+    summary:
+      "Designing parts for 3D printing and laser cutting, from sketch to printable file.",
+    accent: "yellow",
+    sessions: [
+      {
+        id: "sess-2",
+        week_id: "week-2",
+        position: 0,
+        day: "Tuesday",
+        location: "TBC",
+        time: "TBC",
+      },
+      {
+        id: "sess-3",
+        week_id: "week-2",
+        position: 1,
+        day: "Wednesday",
+        location: "TBC",
+        time: "TBC",
+      },
+    ],
+  },
+];
+
 // ----------------------------------------------------------------- tokens --
 
 type Swatch = { name: string; hex: string; className: string };
@@ -550,7 +604,7 @@ export default function AdminUiGalleryPage() {
               <li key={section.id}>
                 <a
                   href={`#${section.id}`}
-                  className="font-blueprint text-ink-dim hover:text-ink focus-visible:ring-lego-yellow/60 inline-flex min-h-[44px] items-center rounded-md border border-white/15 px-3 text-xs whitespace-nowrap uppercase transition-colors hover:border-white/40 hover:bg-white/10 outline-none focus-visible:ring-2"
+                  className="font-blueprint text-ink-dim hover:text-ink focus-visible:ring-lego-yellow/60 inline-flex min-h-[44px] items-center rounded-md border border-white/15 px-3 text-xs whitespace-nowrap uppercase transition-colors outline-none hover:border-white/40 hover:bg-white/10 focus-visible:ring-2"
                 >
                   {section.label}
                 </a>
@@ -767,7 +821,10 @@ export default function AdminUiGalleryPage() {
               </Row>
             </Specimen>
 
-            <Specimen label="Button / sizes" note="default, lg, then full width">
+            <Specimen
+              label="Button / sizes"
+              note="default, lg, then full width"
+            >
               <div className="flex flex-col gap-3">
                 <Row>
                   <Button size="default">Default</Button>
@@ -1099,6 +1156,13 @@ export default function AdminUiGalleryPage() {
             >
               <TasksTable tasks={adminTasks} />
             </PanelSection>
+
+            <PanelSection
+              title="TimelineEditor"
+              description="The public schedule, one card per week. Saving a week writes its fields and any edited sessions together; adding, deleting and reordering write immediately, so none of these controls will work here without a database."
+            >
+              <TimelineEditor weeks={adminTimeline} />
+            </PanelSection>
           </div>
         </GallerySection>
       </div>
@@ -1144,7 +1208,10 @@ function AdminPrimitives() {
             <ActionButton onClick={() => setLastAction("neutral")}>
               Neutral
             </ActionButton>
-            <ActionButton tone="primary" onClick={() => setLastAction("primary")}>
+            <ActionButton
+              tone="primary"
+              onClick={() => setLastAction("primary")}
+            >
               Primary
             </ActionButton>
             <ActionButton tone="danger" onClick={() => setLastAction("danger")}>
