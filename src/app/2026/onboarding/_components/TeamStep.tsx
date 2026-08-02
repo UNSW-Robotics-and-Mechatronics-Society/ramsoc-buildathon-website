@@ -11,6 +11,7 @@ import {
   formatAud,
 } from "@/app/2026/_data/teamConfig";
 import { CHOICE_CARD } from "./styles";
+import FindTeamCallout from "@/app/2026/_components/FindTeamCallout";
 
 export default function TeamStep({
   onComplete,
@@ -19,7 +20,9 @@ export default function TeamStep({
   onComplete: () => void;
   hasTeam: boolean;
 }) {
-  const [mode, setMode] = useState<"choose" | "create" | "join">("choose");
+  const [mode, setMode] = useState<"choose" | "create" | "join" | "find">(
+    "choose",
+  );
   const [delaying, setDelaying] = useState(false);
   const [delayError, setDelayError] = useState("");
 
@@ -81,6 +84,15 @@ export default function TeamStep({
             </span>
           </button>
 
+          <button type="button" onClick={() => setMode("find")} className={CHOICE_CARD}>
+            <span className="font-display text-lg leading-tight tracking-wide uppercase">
+              Find a Team
+            </span>
+            <span className="font-blueprint text-[0.7rem] text-ink-dim uppercase">
+              Signed up on your own? Pair up on Discord or at the kick-off
+            </span>
+          </button>
+
           <button
             type="button"
             onClick={handleDecideLater}
@@ -120,6 +132,29 @@ export default function TeamStep({
           </button>
           {mode === "create" && <CreateTeamForm onComplete={onComplete} />}
           {mode === "join" && <JoinTeamForm onComplete={onComplete} />}
+          {mode === "find" && (
+            <div className="flex flex-col gap-4">
+              <FindTeamCallout />
+              <button
+                type="button"
+                onClick={handleDecideLater}
+                disabled={delaying}
+                className={CHOICE_CARD}
+              >
+                <span className="font-display text-lg leading-tight tracking-wide uppercase">
+                  {delaying ? "Saving…" : "Continue for now"}
+                </span>
+                <span className="font-blueprint text-[0.7rem] text-ink-dim uppercase">
+                  Finish setup and join a team later from your dashboard
+                </span>
+              </button>
+              {delayError && (
+                <p role="alert" className="text-sm text-destructive">
+                  {delayError}
+                </p>
+              )}
+            </div>
+          )}
         </motion.div>
       )}
     </AnimatePresence>

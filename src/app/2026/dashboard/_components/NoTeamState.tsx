@@ -5,7 +5,7 @@ import Card from "@/app/2026/_components/ui/Card";
 import { Button } from "@/app/2026/_components/ui/Button";
 import Path from "@/app/path";
 import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
-import { DISCORD_INVITE } from "@/app/2026/_data/socials";
+import FindTeamCallout from "@/app/2026/_components/FindTeamCallout";
 import type { TeamBrowseItem } from "@/app/_types/registration";
 
 export default function NoTeamState({ teams }: { teams: TeamBrowseItem[] }) {
@@ -22,19 +22,9 @@ export default function NoTeamState({ teams }: { teams: TeamBrowseItem[] }) {
         <Link href={Path[2026].Onboarding} className="block">
           <Button size="full">Create or join a team</Button>
         </Link>
-        <p className="font-main text-ink-dim mt-4 text-sm">
-          Looking for teammates?{" "}
-          <a
-            href={DISCORD_INVITE}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="text-link"
-          >
-            Find a team on the Discord
-          </a>
-          .
-        </p>
       </Card>
+
+      <FindTeamCallout />
 
       {teams.length > 0 && (
         <Card className="bg-blueprint-900/50 p-4 sm:p-5">

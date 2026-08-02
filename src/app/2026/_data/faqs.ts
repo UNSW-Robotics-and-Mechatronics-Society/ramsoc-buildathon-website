@@ -25,6 +25,11 @@ export const FAQS: Faq[] = [
       "Between 2 and 6 people. You can register on your own and use the team browser to find others, or create a team and share your join code with people you already know.",
   },
   {
+    question: "I do not know anyone. Can I still enter?",
+    answer:
+      "Yes, and a good number of people do. Register on your own, then find a team either on the Discord, where there is a channel for exactly this, or in person at the Week 1 kick-off, where we run a team-forming session on the night. You can also browse existing teams from your dashboard and ask a captain for their join code.",
+  },
+  {
     question: "How much does it cost?",
     answer:
       "$50 per team, not per person. Your team captain pays once through the dashboard after the team has at least 2 members. The fee covers your hardware kit and the shop credit you start with.",
