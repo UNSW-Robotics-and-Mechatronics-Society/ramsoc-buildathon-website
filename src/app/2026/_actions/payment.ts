@@ -113,7 +113,7 @@ export async function processPayment(
       // note text is free to change without breaking reconciliation.
       // Square caps referenceId at 40 chars; a UUID is 36.
       referenceId: team.id,
-      note: `Buildathon 2026 entry fee — ${team.name}`,
+      note: `Buildathon 2026 entry fee: ${team.name}`,
       buyerEmailAddress: profile.email,
       billingAddress: {
         postalCode: billing?.postalCode || undefined,
@@ -134,7 +134,7 @@ export async function processPayment(
     }
 
     // Mark the team paid FIRST. If the payments-history insert fails we still
-    // want the team activated — the money has already left the card, and the
+    // want the team activated, the money has already left the card, and the
     // webhook will backfill the history row.
     const { error: updateError } = await supabase
       .from("teams")
@@ -150,7 +150,7 @@ export async function processPayment(
       return {
         success: false,
         error:
-          "Your payment went through but we could not activate your team. Please contact an organiser — do not pay again.",
+          "Your payment went through but we could not activate your team. Please contact an organiser. Do not pay again.",
       };
     }
 

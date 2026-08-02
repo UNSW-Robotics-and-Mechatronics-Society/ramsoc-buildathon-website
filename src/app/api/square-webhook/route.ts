@@ -25,7 +25,7 @@ function isValidSignature(body: string, signatureHeader: string): boolean {
 }
 
 /**
- * Webhook payloads are raw JSON in snake_case — unlike the Square SDK's
+ * Webhook payloads are raw JSON in snake_case, unlike the Square SDK's
  * responses, which are camelCase. Read both so this keeps working if Square
  * ever normalises the shape.
  */
@@ -94,7 +94,7 @@ export async function POST(request: NextRequest) {
 
   const supabase = getSupabaseSecretClient();
 
-  // Already recorded by the checkout flow — just make sure the team is active.
+  // Already recorded by the checkout flow, just make sure the team is active.
   const { data: existing } = await supabase
     .from("payments")
     .select("team_id")

@@ -10,9 +10,14 @@ export const FAQS: Faq[] = [
       "Buildathon is a six-week mechatronics hackathon run by UNSW RAMSoc. Teams work to a provided brief, get a hardware kit to start from, and have access to a component shop throughout the competition. It finishes with a presentation night in Week 6 where judges pick the winners.",
   },
   {
+    question: "What is the brief?",
+    answer:
+      "Build something that helps deliver one of the UN Sustainable Development Goals. That is deliberately wide: past ideas have ranged from water quality monitors and solar trackers to accessibility devices and bushfire sensors. You pick the goal and you pick the problem, and the judges look at how well your build actually addresses it.",
+  },
+  {
     question: "Who can enter?",
     answer:
-      "Anyone. University students of any degree and any year, and high school students too. You do not need to be studying mechatronics, or to have touched a microcontroller before — the weekly workshops start from the basics.",
+      "Anyone. University students of any degree and any year, and high school students too. You do not need to be studying mechatronics, or to have touched a microcontroller before. The weekly workshops start from the basics.",
   },
   {
     question: "How big are teams?",
@@ -27,12 +32,12 @@ export const FAQS: Faq[] = [
   {
     question: "What is in the kit?",
     answer:
-      "An ESP32 development board, a breadboard, an assortment of resistors and LEDs, and a USB cable — enough to get a working prototype going on night one. Anything beyond that comes from the shop.",
+      "An ESP32 development board, a breadboard, an assortment of resistors and LEDs, and a USB cable. That is enough to get a working prototype going on night one. Anything beyond that comes from the shop.",
   },
   {
     question: "What is the shop?",
     answer:
-      "A stall run at each session where you spend tickets on extra components — motors, sensors, drivers, and so on. If you buy something and end up not needing it, you can trade the component back for a refund of its ticket cost.",
+      "A stall run at each session where you spend tickets on extra components such as motors, sensors and drivers. If you buy something and end up not needing it, you can trade the component back for a refund of its ticket cost.",
   },
   {
     question: "How do I earn tickets?",
@@ -42,7 +47,7 @@ export const FAQS: Faq[] = [
   {
     question: "Can I use my own components?",
     answer:
-      "Yes. You just have to declare them — submit an itemised list of any external components with your final build so the judges are comparing like with like.",
+      "Yes. You just have to declare them. Submit an itemised list of any external components with your final build so the judges are comparing like with like.",
   },
   {
     question: "How much time should I expect to put in?",
@@ -62,7 +67,7 @@ export const FAQS: Faq[] = [
   {
     question: "Can my team win more than one prize?",
     answer:
-      "Teams can only win one prize, with the exception of People's Choice — that one can be won alongside another award.",
+      "Teams can only win one prize, with the exception of People's Choice, which can be won alongside another award.",
   },
   {
     question: "When is the build due?",
@@ -72,6 +77,6 @@ export const FAQS: Faq[] = [
   {
     question: "I have never done any of this before. Is that a problem?",
     answer:
-      "Not at all — a good share of every cohort is in exactly that position. The workshops run from first principles, and mentors are on hand at every build session.",
+      "Not at all. A good share of every cohort is in exactly that position. The workshops run from first principles, and mentors are on hand at every build session.",
   },
 ];

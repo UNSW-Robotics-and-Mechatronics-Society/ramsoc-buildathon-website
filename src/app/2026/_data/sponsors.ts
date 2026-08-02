@@ -4,7 +4,7 @@ export type Sponsor = {
   url?: string;
   /**
    * Plate colour behind the logo. These are fixed-colour brand marks, so each
-   * needs the background it was drawn for — Arc's green outline and Engineers
+   * needs the background it was drawn for, Arc's green outline and Engineers
    * Australia read on white, the UNSW school marks on UNSW yellow, and ANT61's
    * white wordmark needs black.
    */
@@ -13,7 +13,7 @@ export type Sponsor = {
 
 /**
  * Carried over from the Sumobots 2026 partner set. `yokogawa-logo.png` is the
- * file Sumobots stored as `icon.png` — same artwork, saner name.
+ * file Sumobots stored as `icon.png`, same artwork, saner name.
  */
 export const SPONSORS: Sponsor[] = [
   {

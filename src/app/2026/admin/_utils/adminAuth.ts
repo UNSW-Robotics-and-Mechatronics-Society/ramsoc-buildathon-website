@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 /**
  * The admin area is gated on a single shared-password session cookie, entirely
  * separate from Clerk. `src/middleware.ts` checks the same cookie before Clerk
- * runs, but middleware only covers page navigation — every server action and
+ * runs, but middleware only covers page navigation, every server action and
  * route handler re-checks it here so a direct POST cannot bypass the gate.
  */
 export const ADMIN_COOKIE = "admin_session";

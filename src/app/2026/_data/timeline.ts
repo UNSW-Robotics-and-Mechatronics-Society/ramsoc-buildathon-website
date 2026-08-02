@@ -1,7 +1,7 @@
 /**
  * Buildathon 2026 runs across the first six weeks of term.
  *
- * Sessions marked TBD are still being locked in with the venue — the admin
+ * Sessions marked TBD are still being locked in with the venue, the admin
  * settings panel does not drive this yet, so update the entries here as rooms
  * are confirmed.
  */

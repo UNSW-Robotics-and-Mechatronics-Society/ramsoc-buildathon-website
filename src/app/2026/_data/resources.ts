@@ -55,7 +55,7 @@ export type Troubleshoot = {
 export const TROUBLESHOOTING: Troubleshoot[] = [
   {
     problem: "'LED_BUILTIN' was not declared in this scope",
-    fix: "The ESP32 board definition does not define LED_BUILTIN. Replace it with the pin number directly — on most ESP32 dev boards that is 2.",
+    fix: "The ESP32 board definition does not define LED_BUILTIN. Replace it with the pin number directly. On most ESP32 dev boards that is 2.",
   },
   {
     problem: "Board is not in download mode / upload times out",

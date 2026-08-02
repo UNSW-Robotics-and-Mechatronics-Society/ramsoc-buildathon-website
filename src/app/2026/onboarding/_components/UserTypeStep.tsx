@@ -29,7 +29,7 @@ const USER_TYPE_OPTIONS: {
 
 /**
  * Buildathon runs a single division open to everyone, so this step only
- * decides which set of detail fields to show next — it never gates entry.
+ * decides which set of detail fields to show next, it never gates entry.
  */
 export default function UserTypeStep({
   onSelect,
@@ -48,7 +48,7 @@ export default function UserTypeStep({
         <p className="spec-label">Step 01 / Entrant</p>
         <h2 className="mt-1 mb-2 text-2xl sm:text-3xl">Who are you?</h2>
         <p className="font-main text-sm text-ink-dim">
-          Everyone competes in the same division — this just tells us which
+          Everyone competes in the same division. This just tells us which
           details to ask for.
         </p>
       </motion.div>

@@ -5,7 +5,7 @@
  */
 
 /**
- * The editable slice of `app_config`. Buildathon has no season/phase system —
+ * The editable slice of `app_config`. Buildathon has no season/phase system , 
  * a single registration window plus a payment deadline is the whole of it.
  * Dates are carried as ISO strings so they cross the server/client boundary
  * unambiguously.

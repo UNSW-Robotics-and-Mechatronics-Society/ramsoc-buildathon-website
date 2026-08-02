@@ -13,7 +13,7 @@ type MemberWithProfile = TeamMember & { profile: Profile };
 
 /**
  * Brick colourways. Written as literal class strings so Tailwind's scanner
- * keeps them — never build these names by interpolation.
+ * keeps them, never build these names by interpolation.
  */
 const CAPTAIN_BRICK = "bg-lego-yellow/20 text-lego-yellow";
 const MEMBER_BRICKS = [

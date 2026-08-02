@@ -39,7 +39,7 @@ export async function getAllTeams(): Promise<AdminTeamRow[]> {
       ...t,
       team_members: undefined,
       member_count: members.length,
-      member_names: ordered.map((m) => m.profile?.full_name ?? "—"),
+      member_names: ordered.map((m) => m.profile?.full_name ?? "-"),
     } as AdminTeamRow;
   });
 }
@@ -224,7 +224,7 @@ export async function adminMoveToTeam(
           .update({ role: "captain" })
           .eq("id", others[0].id);
       } else {
-        // Solo captain — delete the empty team
+        // Solo captain, delete the empty team
         await supabase
           .from("teams")
           .delete()

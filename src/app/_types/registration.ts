@@ -38,7 +38,7 @@ export type Profile = {
 };
 
 /**
- * Buildathon runs a single division — unlike Sumobots there is no
+ * Buildathon runs a single division, unlike Sumobots there is no
  * standard/open category split. Every team pays the same flat entry fee and
  * has the same 2-6 member limits.
  */

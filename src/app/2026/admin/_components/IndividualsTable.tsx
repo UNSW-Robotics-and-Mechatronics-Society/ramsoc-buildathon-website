@@ -35,7 +35,7 @@ const USER_TYPE_LABELS: Record<string, string> = {
 function institution(p: ProfileWithTeam): string {
   if (p.user_type === "unsw") return "UNSW";
   if (p.user_type === "high_school") return p.high_school || "High school";
-  return p.university || "—";
+  return p.university || "-";
 }
 
 function studentId(p: ProfileWithTeam): string {
@@ -144,7 +144,7 @@ export default function IndividualsTable({
                     scope="row"
                     className="font-main text-ink px-3 py-2.5 text-left text-sm font-normal"
                   >
-                    {p.full_name || "—"}
+                    {p.full_name || "-"}
                     {!p.onboarded && (
                       <span className="mt-1 block">
                         <StatusPill tone="neutral">Onboarding</StatusPill>
@@ -167,7 +167,7 @@ export default function IndividualsTable({
                       </span>
                     )}
                     <span className="font-blueprint text-ink-dim/70 mt-0.5 block text-[11px] uppercase">
-                      {USER_TYPE_LABELS[p.user_type] ?? "—"}
+                      {USER_TYPE_LABELS[p.user_type] ?? "-"}
                     </span>
                   </td>
                   <td className="px-3 py-2.5">

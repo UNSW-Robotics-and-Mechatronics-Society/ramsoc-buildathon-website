@@ -20,7 +20,7 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-3xl px-4 pt-8 pb-28 sm:px-6 sm:pt-12 sm:pb-12">
-      {/* Drafting docket header — the title block of a technical drawing. */}
+      {/* Drafting docket header, the title block of a technical drawing. */}
       <header className="border-grid-major mb-6 border-b pb-4">
         <Link
           href={Path[2026].Root}

@@ -5,6 +5,7 @@ import Card from "@/app/2026/_components/ui/Card";
 import { Button } from "@/app/2026/_components/ui/Button";
 import Path from "@/app/path";
 import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
+import { DISCORD_INVITE } from "@/app/2026/_data/socials";
 import type { TeamBrowseItem } from "@/app/_types/registration";
 
 export default function NoTeamState({ teams }: { teams: TeamBrowseItem[] }) {
@@ -21,6 +22,18 @@ export default function NoTeamState({ teams }: { teams: TeamBrowseItem[] }) {
         <Link href={Path[2026].Onboarding} className="block">
           <Button size="full">Create or join a team</Button>
         </Link>
+        <p className="font-main text-ink-dim mt-4 text-sm">
+          Looking for teammates?{" "}
+          <a
+            href={DISCORD_INVITE}
+            target="_blank"
+            rel="noreferrer noopener"
+            className="text-link"
+          >
+            Find a team on the Discord
+          </a>
+          .
+        </p>
       </Card>
 
       {teams.length > 0 && (
@@ -28,7 +41,7 @@ export default function NoTeamState({ teams }: { teams: TeamBrowseItem[] }) {
           <p className="spec-label">Registry</p>
           <h3 className="mt-1 text-lg">Browse teams</h3>
           <p className="font-main text-ink-dim mt-1 mb-4 text-sm">
-            Ask a captain for their join code — codes are not listed here.
+            Ask a captain for their join code. Codes are not listed here.
           </p>
           <ul className="divide-y divide-white/10">
             {teams.map((team) => (

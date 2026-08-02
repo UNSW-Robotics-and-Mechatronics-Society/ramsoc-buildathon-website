@@ -8,13 +8,13 @@ import { getLiveRegistrationStatus } from "@/app/2026/_actions/appConfig";
 import type { TeamWithMembers, TeamBrowseItem } from "@/app/_types/registration";
 
 /**
- * Buildathon runs a single division — there is no standard/open split, no
+ * Buildathon runs a single division, there is no standard/open split, no
  * category column, and no season-phase locking. Teams are 2-6 people and are
  * open to UNSW students, students at other universities, and high schoolers
  * alike. The only gate on forming or joining a team is the registration window.
  */
 
-// Unambiguous alphabet — no O/0 or I/1 to mistype off a slide or whiteboard.
+// Unambiguous alphabet, no O/0 or I/1 to mistype off a slide or whiteboard.
 const JOIN_CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
 const JOIN_CODE_LENGTH = 6;
 
@@ -122,7 +122,7 @@ export async function createTeam(
   const supabase = getSupabaseSecretClient();
 
   // One team per person. The database enforces this too
-  // (team_members_one_team_per_profile_idx) — this check exists purely to give
+  // (team_members_one_team_per_profile_idx), this check exists purely to give
   // a friendlier message than a constraint violation would.
   const { data: existingMembership } = await supabase
     .from("team_members")
@@ -300,7 +300,7 @@ export async function joinTeam(
 
   if (!team) return { success: false, error: "Invalid join code" };
 
-  // Same cap for every team — Buildathon has one division.
+  // Same cap for every team, Buildathon has one division.
   const { count } = await supabase
     .from("team_members")
     .select("id", { count: "exact", head: true })
@@ -335,7 +335,7 @@ export async function joinTeam(
 // ── leaveTeam ────────────────────────────────────────────────────────────────
 
 /**
- * Leaving is allowed regardless of the registration window — someone who can
+ * Leaving is allowed regardless of the registration window, someone who can
  * no longer take part should always be able to free up their spot.
  */
 export async function leaveTeam(): Promise<{
@@ -403,7 +403,7 @@ export async function leaveTeam(): Promise<{
         return { success: false, error: "Failed to leave team" };
       }
     } else {
-      // Solo captain — delete the team (CASCADE cleans up team_members).
+      // Solo captain, delete the team (CASCADE cleans up team_members).
       const { error: deleteError } = await supabase
         .from("teams")
         .delete()
@@ -531,7 +531,7 @@ export async function promoteMember(
     return { success: false, error: "Only the captain can promote members" };
   }
 
-  // Demote first — one captain per team is a unique index, so the reverse
+  // Demote first, one captain per team is a unique index, so the reverse
   // order would be rejected.
   const { error: demoteError } = await supabase
     .from("team_members")
@@ -605,7 +605,7 @@ export async function renameTeam(
     return { success: false, error: "Only the captain can rename the team" };
   }
 
-  // Case-insensitive uniqueness per year — checked here for a clear message,
+  // Case-insensitive uniqueness per year, checked here for a clear message,
   // and caught below if another request wins the race.
   const { data: nameClash } = await supabase
     .from("teams")

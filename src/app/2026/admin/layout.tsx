@@ -6,7 +6,7 @@ export const metadata: Metadata = {
 };
 
 /**
- * The admin area always reads live data — organisers are moving people between
+ * The admin area always reads live data, organisers are moving people between
  * teams and marking payments, and a cached roster would be actively wrong.
  */
 export const dynamic = "force-dynamic";

@@ -2,7 +2,7 @@ import { getSupabaseSecretClient } from "./supabase";
 
 /**
  * Log an error to the error_logs table for structured monitoring.
- * Fire-and-forget — never throws so it won't mask the original error.
+ * Fire-and-forget, never throws so it won't mask the original error.
  */
 export async function logError(
   source: string,

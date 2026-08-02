@@ -1,7 +1,7 @@
 /**
  * Buildathon 2026: one division, teams of 2-6, flat $50 entry fee per team.
  *
- * A team must reach MIN_MEMBERS before its captain can pay — the fee is per
+ * A team must reach MIN_MEMBERS before its captain can pay, the fee is per
  * team, so we do not let a solo captain lock in a team that will never field
  * a full roster.
  */
@@ -17,7 +17,7 @@ export function getEntryFeeCents(): number {
 
 /**
  * Square keeps 2.2% of each transaction. Gross the charge up so RAMSoc nets
- * the full entry fee. Single source of truth — both the server action and the
+ * the full entry fee. Single source of truth, both the server action and the
  * payment form read this, so the displayed total always matches the charge.
  */
 export const SQUARE_FEE_RATE = 0.022;

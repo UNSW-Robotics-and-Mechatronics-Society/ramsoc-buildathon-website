@@ -24,7 +24,7 @@ export default async function OnboardingPage() {
 
   const regStatus = await getLiveRegistrationStatus();
 
-  // Registration hasn't opened / has closed and this user hasn't started —
+  // Registration hasn't opened / has closed and this user hasn't started , 
   // block entry. Anyone with a profile can still finish what they began.
   if (!regStatus.isOpen && !profile) {
     return (

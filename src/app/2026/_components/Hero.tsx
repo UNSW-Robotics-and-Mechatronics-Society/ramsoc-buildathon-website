@@ -1,6 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import Path from "@/app/path";
+import BuildTypewriter from "@/app/2026/_components/BuildTypewriter";
+import { DISCORD_INVITE } from "@/app/2026/_data/socials";
 import { MEMBER_LIMITS, getEntryFeeCents, formatAud } from "@/app/2026/_data/teamConfig";
 
 const SPECS = [
@@ -25,13 +27,17 @@ export default function Hero() {
             <span className="sr-only"> 2026</span>
           </h1>
 
+          <BuildTypewriter />
+
           <p className="text-ink-dim mb-8 max-w-xl text-lg">
-            A six-week mechatronics hackathon. Form a team, get a kit, and turn
-            a brief into something that actually moves — no experience needed.
+            A six-week mechatronics hackathon. Form a team, get a kit, and build
+            something that pushes a UN Sustainable Development Goal forward. No
+            experience needed.
           </p>
 
           {/* Spec block, drafted like a title block on an engineering drawing. */}
-          <dl className="drafting-frame mb-9 inline-block rounded-lg px-5 py-4">
+          {/* Solid-ish surface so the ruled grid does not run through the figures. */}
+          <dl className="drafting-frame bg-blueprint-900/85 mb-9 inline-block rounded-lg px-5 py-4 backdrop-blur-sm">
             {SPECS.map((spec) => (
               <div
                 key={spec.label}
@@ -51,7 +57,15 @@ export default function Hero() {
             <Link href={Path[2026].SignUp} className="button">
               Register your team
             </Link>
-            <a href={Path[2026].About} className="button-outline">
+            <a
+              href={DISCORD_INVITE}
+              target="_blank"
+              rel="noreferrer noopener"
+              className="button-discord"
+            >
+              Join the Discord
+            </a>
+            <a href={Path[2026].About} className="text-link font-blueprint text-xs uppercase">
               What is it?
             </a>
           </div>
@@ -61,7 +75,7 @@ export default function Hero() {
           <div className="border-grid-major relative aspect-square overflow-hidden rounded-xl border shadow-2xl">
             <Image
               src="/2026/brand/hero-square.jpg"
-              alt="Buildathon 2026 — LEGO minifigures and electronics components laid out on an engineering blueprint"
+              alt="Buildathon 2026 poster: LEGO minifigures and electronics components laid out on an engineering blueprint"
               fill
               priority
               sizes="(max-width: 1024px) 100vw, 45vw"

@@ -8,7 +8,7 @@ const isProtectedRoute = createRouteMatcher([
 
 /**
  * Everything under /2026/admin except the login page itself. Matching by
- * exclusion means a new admin section is protected the moment it is added —
+ * exclusion means a new admin section is protected the moment it is added , 
  * the Sumobots version listed routes individually and had already drifted,
  * leaving /admin/tasks and /admin/settings unguarded.
  */

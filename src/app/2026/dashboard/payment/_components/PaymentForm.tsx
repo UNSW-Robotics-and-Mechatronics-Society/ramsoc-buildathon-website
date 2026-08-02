@@ -9,7 +9,7 @@ import { formatAud } from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 
 /* ------------------------------------------------------------------ */
-/*  Square Web Payments SDK — minimal typings                         */
+/*  Square Web Payments SDK, minimal typings                         */
 /* ------------------------------------------------------------------ */
 
 interface TokenResult {
@@ -139,7 +139,7 @@ const GOOGLE_PAY_CONTAINER_ID = "square-google-pay-container";
 /**
  * Blueprint theming for the card iframe. Square validates this object and
  * throws on anything it does not recognise, so initialisation retries with an
- * unstyled card if the theme is ever rejected — an ugly form still takes
+ * unstyled card if the theme is ever rejected, an ugly form still takes
  * money, a broken one does not.
  */
 const CARD_STYLE = {
@@ -243,7 +243,7 @@ export default function PaymentForm({
 
         if (response.success) {
           setSuccess(true);
-          // Team is now paid — make sure the dashboard reflects that.
+          // Team is now paid, make sure the dashboard reflects that.
           router.refresh();
         } else {
           setError(response.error ?? "Payment failed. Please try again.");
@@ -269,7 +269,7 @@ export default function PaymentForm({
 
     if (!appId || !locationId) {
       setError(
-        "Payments are not configured. Please contact an organiser — do not try again.",
+        "Payments are not configured. Please contact an organiser. Do not try again.",
       );
       setLoading(false);
       return;
@@ -320,7 +320,7 @@ export default function PaymentForm({
         });
 
         try {
-          // Apple Pay is not attached — the SDK only validates availability,
+          // Apple Pay is not attached, the SDK only validates availability,
           // and tokenize() must be called straight from the click handler.
           const applePay = await payments.applePay(paymentRequest);
           if (cancelled) {
@@ -374,7 +374,7 @@ export default function PaymentForm({
           try {
             await ref.current?.destroy();
           } catch {
-            /* the SDK throws if already destroyed — nothing to do */
+            /* the SDK throws if already destroyed, nothing to do */
           }
           ref.current = null;
         }
@@ -572,7 +572,7 @@ export default function PaymentForm({
           />
         )}
 
-        {/* Never `display: none` — Square attaches to this node before we
+        {/* Never `display: none`, Square attaches to this node before we
             know whether Google Pay is available, and it cannot measure a
             hidden element. Empty, it collapses to zero height. */}
         <div
@@ -623,7 +623,7 @@ export default function PaymentForm({
               <div className="font-blueprint text-ink-dim flex h-[90px] items-center justify-center px-3 text-center text-xs uppercase">
                 {loading
                   ? "Loading secure card form…"
-                  : "Card form unavailable — please refresh"}
+                  : "Card form unavailable, please refresh"}
               </div>
             )}
           </div>

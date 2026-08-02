@@ -35,7 +35,7 @@ export default function AdminLoginPage() {
       </div>
 
       <div className="w-full max-w-sm">
-        {/* A yellow brick with studs — the one piece of set-dressing in the
+        {/* A yellow brick with studs, the one piece of set-dressing in the
             admin area, since the login screen has no data to compete with. */}
         <div className="lego-studs text-lego-yellow">
           <div className="brick drafting-frame bg-blueprint-900 p-6">

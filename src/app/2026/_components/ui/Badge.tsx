@@ -4,7 +4,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 /**
  * Small status chip. Colours come from the LEGO accent palette so badges read
  * as part of the brick vocabulary rather than as generic Tailwind status
- * colours — green for settled, yellow for outstanding, red for problems.
+ * colours, green for settled, yellow for outstanding, red for problems.
  */
 const badgeVariants = cva(
   "font-blueprint inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs uppercase",

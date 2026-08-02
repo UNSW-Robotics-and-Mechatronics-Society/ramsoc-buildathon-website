@@ -15,7 +15,7 @@ import { BRICK_CTA } from "./styles";
 import type { UserType } from "@/app/_types/registration";
 
 /**
- * Buildathon onboarding is three steps — there is no division picker, because
+ * Buildathon onboarding is three steps, there is no division picker, because
  * there is only one division:
  *
  *   1. Who you are (UNSW / other uni / high school)

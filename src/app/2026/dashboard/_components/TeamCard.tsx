@@ -26,7 +26,7 @@ export default function TeamCard({
   const membersNeeded = MEMBER_LIMITS.min - memberCount;
   const needsMoreMembers = !team.paid && membersNeeded > 0;
   // Base entry fee only. The Square processing gross-up is computed once, on
-  // the server (getPaymentQuote), and shown on the payment page — it is never
+  // the server (getPaymentQuote), and shown on the payment page, it is never
   // recomputed in the UI.
   const entryFee = formatAud(getEntryFeeCents());
 

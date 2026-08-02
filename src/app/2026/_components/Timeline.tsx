@@ -20,7 +20,7 @@ export default function Timeline() {
   return (
     <section id="timeline" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="spec-label mb-3">Section B — Schedule</p>
+        <p className="spec-label mb-3">Section B · Schedule</p>
         <h2 className="text-ink mb-4">Timeline</h2>
         <p className="text-ink-dim mb-12 max-w-2xl text-lg">
           Sessions run Tuesday and Wednesday evenings through Weeks 1 to 6.
@@ -34,7 +34,7 @@ export default function Timeline() {
               className="bg-blueprint-900/70 border-grid-major overflow-hidden rounded-xl border"
             >
               <div className="flex flex-col gap-4 p-5 sm:flex-row sm:gap-6 sm:p-6">
-                {/* Week marker — a LEGO brick stud strip in the week's colour */}
+                {/* Week marker, a LEGO brick stud strip in the week's colour */}
                 <div className="flex shrink-0 items-start gap-4 sm:w-44 sm:flex-col sm:gap-2">
                   <div
                     className={`lego-studs brick flex h-14 w-14 items-center justify-center ${ACCENT_BG[week.accent]}`}

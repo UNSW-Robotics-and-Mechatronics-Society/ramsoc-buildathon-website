@@ -11,12 +11,12 @@ import { COMPETITION_YEAR } from "@/app/2026/_data/teamConfig";
 
 /**
  * Live registration dates from app_config, falling back to the hardcoded
- * defaults if the row is missing or the table is unreachable — the marketing
+ * defaults if the row is missing or the table is unreachable, the marketing
  * site should still render if the database is down.
  */
 export async function getAppConfig(): Promise<RegistrationDates> {
-  // The marketing site reads this on every render, so a database outage — or a
-  // local checkout with no Supabase credentials yet — must degrade to the
+  // The marketing site reads this on every render, so a database outage, or a
+  // local checkout with no Supabase credentials yet, must degrade to the
   // hardcoded dates rather than blanking the page.
   let data: {
     registration_opens: string | null;

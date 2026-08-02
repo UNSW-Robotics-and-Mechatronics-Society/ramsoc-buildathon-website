@@ -9,14 +9,14 @@
 /*
  * Buildathon 2026 runs a blueprint + LEGO theme: a deep drafting-blue ground
  * ruled with a faint white grid, white "ink" type, and saturated LEGO brick
- * colours as accents. LEGO yellow is the primary action colour — it is the
+ * colours as accents. LEGO yellow is the primary action colour, it is the
  * highest-contrast accent available against blueprint blue.
  */
 
 @theme inline {
   /*
    * The wordmark on the promo art is built from round dots, like LEGO studs on
-   * a baseplate — the same idea as Nothing's NDot, which is proprietary and
+   * a baseplate, the same idea as Nothing's NDot, which is proprietary and
    * can't be used here. Bitcount is an OFL variable font that draws every
    * glyph out of round dots natively, so it holds up at any size rather than
    * needing a clipped gradient.
@@ -85,7 +85,7 @@
 
 /*
  * The dot-matrix wordmark face. Every glyph is drawn from round dots, so this
- * is the LEGO-stud treatment — no gradient clipping needed.
+ * is the LEGO-stud treatment, no gradient clipping needed.
  *
  * ELSH (element shape) 0 keeps the elements circular; ELXP (element expansion)
  * 0 keeps them as discrete dots rather than merging into solid strokes.
@@ -223,7 +223,7 @@
 
   /*
    * Display headings (the wordmark and section titles) use the dotted face.
-   * h3/h4 stay on the condensed sans — they sit close to body copy and at
+   * h3/h4 stay on the condensed sans, they sit close to body copy and at
    * those sizes the dot grid stops resolving into readable letterforms.
    */
   h1,
@@ -273,7 +273,7 @@
 /* ----------------------------------------------------------- components -- */
 
 @layer components {
-  /* Primary CTA — a yellow LEGO brick. */
+  /* Primary CTA, a yellow LEGO brick. */
   .button {
     @apply brick font-display inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-3 text-lg font-bold tracking-wide uppercase;
     background-color: var(--color-lego-yellow);
@@ -284,14 +284,33 @@
     background-color: #ffd928;
   }
 
+  /*
+   * Secondary CTA. It sits on the ruled blueprint grid, so it needs its own
+   * surface: a translucent slab plus a blur, otherwise the grid lines run
+   * straight through the label and the button reads as floating text.
+   */
   .button-outline {
-    @apply font-display inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border px-6 py-3 text-lg font-bold tracking-wide uppercase;
+    @apply brick font-display inline-flex min-h-[44px] items-center justify-center gap-2 border px-6 py-3 text-lg font-bold tracking-wide uppercase;
     border-color: var(--color-grid-major);
+    background-color: rgb(7 47 107 / 0.85);
+    backdrop-filter: blur(6px);
     color: var(--color-ink);
+    box-shadow: 0 0.35rem 0 rgb(0 0 0 / 0.18);
   }
 
   .button-outline:hover {
-    background-color: rgb(255 255 255 / 0.08);
+    background-color: rgb(14 75 166 / 0.9);
+    border-color: rgb(255 255 255 / 0.32);
+  }
+
+  /* Discord CTA, in Discord's own blurple so it is recognisable at a glance. */
+  .button-discord {
+    @apply brick font-display inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-3 text-lg font-bold tracking-wide text-white uppercase;
+    background-color: #5865f2;
+  }
+
+  .button-discord:hover {
+    background-color: #6b76f5;
   }
 
   .text-link {
@@ -304,10 +323,32 @@
     color: #ffd928;
   }
 
+  /* Blinking block cursor for the hero typewriter. */
+  .caret {
+    display: inline-block;
+    width: 0.58em;
+    height: 1em;
+    margin-left: 0.08em;
+    vertical-align: -0.12em;
+    background-color: currentColor;
+    animation: caret-blink 1s steps(1, end) infinite;
+  }
+
   /* Technical label, as annotated on engineering drawings. */
   .spec-label {
     @apply font-blueprint text-xs uppercase;
     color: var(--color-ink-dim);
+  }
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
   }
 }
 

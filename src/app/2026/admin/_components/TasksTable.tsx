@@ -236,7 +236,7 @@ export default function TasksTable({ tasks }: { tasks: AdminTask[] }) {
                         )}
                       </th>
                       <td className="font-main text-ink-dim max-w-sm px-3 py-2.5 text-sm">
-                        {task.description || "—"}
+                        {task.description || "-"}
                       </td>
                       <td className="px-3 py-2.5">
                         <StatusPill tone={task.active ? "paid" : "neutral"}>
@@ -341,7 +341,7 @@ export default function TasksTable({ tasks }: { tasks: AdminTask[] }) {
             </div>
           ) : (
             <p className="font-main text-ink-dim mt-3 text-xs">
-              No active tasks — the Tasks card is hidden on the dashboard.
+              No active tasks. The Tasks card is hidden on the dashboard.
             </p>
           )}
         </Panel>

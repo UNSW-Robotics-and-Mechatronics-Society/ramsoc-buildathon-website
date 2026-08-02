@@ -4,7 +4,7 @@ export default function Faq() {
   return (
     <section id="faq" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-4xl px-4 sm:px-6">
-        <p className="spec-label mb-3">Section D — Notes</p>
+        <p className="spec-label mb-3">Section D · Notes</p>
         <h2 className="text-ink mb-12">FAQ</h2>
 
         <div className="space-y-3">

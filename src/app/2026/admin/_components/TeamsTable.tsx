@@ -210,7 +210,7 @@ export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
                       {team.join_code}
                     </td>
                     <td className="font-main text-ink-dim px-3 py-2 text-sm">
-                      {team.member_names[0] ?? "—"}
+                      {team.member_names[0] ?? "-"}
                     </td>
                     <td className="font-blueprint text-ink-dim px-3 py-2 text-xs tabular-nums">
                       {new Date(team.created_at).toLocaleDateString("en-AU")}

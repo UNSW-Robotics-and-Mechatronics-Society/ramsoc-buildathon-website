@@ -12,7 +12,7 @@ export default function Sponsors() {
   return (
     <section id="sponsors" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="spec-label mb-3">Section E — Acknowledgements</p>
+        <p className="spec-label mb-3">Section E · Acknowledgements</p>
         <h2 className="text-ink mb-12">Supported by</h2>
 
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">

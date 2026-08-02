@@ -92,7 +92,7 @@ export function PanelSection({
 
 /**
  * Contained horizontal + vertical scroll for a table. The page body never
- * scrolls sideways — overflow is trapped in here — and the capped height is
+ * scrolls sideways, overflow is trapped in here, and the capped height is
  * what makes the sticky header meaningful.
  */
 export function TableFrame({ children }: { children: React.ReactNode }) {
@@ -259,7 +259,7 @@ type ActionTone = keyof typeof actionTones;
 
 /**
  * A compact row action. Kept to a 44px tap target even though the label is
- * small — organisers use this on laptops and on phones at the venue.
+ * small, organisers use this on laptops and on phones at the venue.
  */
 export function ActionButton({
   tone = "neutral",

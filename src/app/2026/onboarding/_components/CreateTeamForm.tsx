@@ -48,7 +48,7 @@ export default function CreateTeamForm({ onComplete }: { onComplete: () => void 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Clipboard blocked (insecure context / permissions) — the code is on
+      // Clipboard blocked (insecure context / permissions), the code is on
       // screen anyway, so there is nothing useful to say.
     }
   }

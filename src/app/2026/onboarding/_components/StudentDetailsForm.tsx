@@ -11,7 +11,7 @@ import { BRICK_CTA, DRAFTING_LABELS, SELECT_OPTIONS } from "./styles";
 
 /*
  * Every field below maps to a column on `profiles` in
- * supabase/migrations/001_initial_schema.sql. Nothing here is division-aware —
+ * supabase/migrations/001_initial_schema.sql. Nothing here is division-aware , 
  * Buildathon runs a single division open to all three cohorts.
  */
 
@@ -500,7 +500,7 @@ export default function StudentDetailsForm({
         </p>
       </div>
 
-      <SectionRule>01 — Identity</SectionRule>
+      <SectionRule>01 · Identity</SectionRule>
 
       <Field delay={nextDelay()}>
         <Input
@@ -572,7 +572,7 @@ export default function StudentDetailsForm({
 
       {!isHighSchool && (
         <>
-          <SectionRule>02 — Study</SectionRule>
+          <SectionRule>02 · Study</SectionRule>
 
           <Field delay={nextDelay()}>
             <Select
@@ -713,7 +713,7 @@ export default function StudentDetailsForm({
         </>
       )}
 
-      <SectionRule>{isHighSchool ? "02" : "03"} — About you</SectionRule>
+      <SectionRule>{isHighSchool ? "02" : "03"} · About you</SectionRule>
 
       <Field delay={nextDelay()}>
         <RadioGroup

@@ -9,7 +9,7 @@ const STEPS = [
   {
     n: "02",
     title: "Get the brief and a kit",
-    body: "Every team starts with an ESP32, a breadboard and a handful of components on kick-off night.",
+    body: "Build something that helps deliver a UN Sustainable Development Goal. Every team starts with an ESP32, a breadboard and a handful of components on kick-off night.",
   },
   {
     n: "03",
@@ -32,11 +32,11 @@ export default function About() {
   return (
     <section id="about" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="spec-label mb-3">Section A — Overview</p>
+        <p className="spec-label mb-3">Section A · Overview</p>
         <h2 className="text-ink mb-4">What is Buildathon?</h2>
         <p className="text-ink-dim mb-12 max-w-2xl text-lg">
           Six weeks, one brief, and whatever you can build with it. Buildathon
-          is RAMSoc&apos;s hardware hackathon — closer to a term-long project
+          is RAMSoc&apos;s hardware hackathon, closer to a term-long project
           than a weekend sprint, and open to everyone regardless of degree or
           experience.
         </p>

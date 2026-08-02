@@ -270,7 +270,7 @@ export function BottomTabBar({
   );
 }
 
-/** Desktop tab strip — a row of LEGO tiles. */
+/** Desktop tab strip, a row of LEGO tiles. */
 function TabStrip({
   tab,
   setTab,
@@ -367,7 +367,7 @@ export default function DashboardContent({
                 </h2>
                 <p className="font-main text-ink-dim mt-1.5 text-sm">
                   {hasTeam && isPaid
-                    ? "Your team is registered and active. Nothing left to do — start planning your build."
+                    ? "Your team is registered and active. Nothing left to do, so start planning your build."
                     : "Work through the checklist below to get your team on the floor."}
                 </p>
               </Card>
@@ -419,7 +419,7 @@ export default function DashboardContent({
                 </CollapsibleSection>
               )}
 
-              {/* Schedule pointer — the full timeline lives on the homepage. */}
+              {/* Schedule pointer, the full timeline lives on the homepage. */}
               <Card className="bg-blueprint-900/50 p-4 sm:p-5">
                 <p className="spec-label">Schedule</p>
                 <h3 className="mt-1 text-lg">Six weeks, one build</h3>

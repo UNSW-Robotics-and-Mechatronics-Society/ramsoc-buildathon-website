@@ -37,7 +37,7 @@ export default function Resources() {
   return (
     <section id="resources" className="scroll-mt-20 py-16 md:py-24">
       <div className="mx-auto max-w-6xl px-4 sm:px-6">
-        <p className="spec-label mb-3">Section C — Reference</p>
+        <p className="spec-label mb-3">Section C · Reference</p>
         <h2 className="text-ink mb-4">Resources</h2>
         <p className="text-ink-dim mb-10 max-w-2xl text-lg">
           Slides and recordings go up here as each workshop runs.

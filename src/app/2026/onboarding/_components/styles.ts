@@ -18,5 +18,5 @@ export const CHOICE_CARD =
 export const DRAFTING_LABELS =
   "[&_label:not([data-choice])]:font-blueprint [&_label:not([data-choice])]:text-[0.7rem] [&_label:not([data-choice])]:uppercase [&_label:not([data-choice])]:text-ink-dim";
 
-/** Native <option> menus render on the OS surface — force them readable. */
+/** Native <option> menus render on the OS surface, force them readable. */
 export const SELECT_OPTIONS = "[&>option]:bg-blueprint-900 [&>option]:text-ink";

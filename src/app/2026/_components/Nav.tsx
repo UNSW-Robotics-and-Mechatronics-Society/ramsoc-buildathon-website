@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { Menu, X } from "lucide-react";
 import Path from "@/app/path";
@@ -32,11 +33,21 @@ export default function Nav() {
       >
         <Link
           href={Path[2026].Root}
-          className="font-stud text-ink text-2xl leading-none lowercase"
+          className="flex items-center gap-3"
+          aria-label="Buildathon 2026 home"
         >
-          buildathon
-          <span className="text-lego-yellow font-stud ml-2 align-baseline text-xl">
-            2026
+          <Image
+            src="/2026/brand/ramsoc-logo.svg"
+            alt=""
+            width={36}
+            height={36}
+            className="h-9 w-9 shrink-0"
+          />
+          <span className="font-stud text-ink text-2xl leading-none lowercase">
+            buildathon
+            <span className="text-lego-yellow ml-2 align-baseline text-xl">
+              2026
+            </span>
           </span>
         </Link>
 

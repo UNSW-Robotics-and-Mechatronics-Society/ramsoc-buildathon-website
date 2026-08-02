@@ -6,8 +6,8 @@ import { logError } from "@/app/_utils/errorLog";
 import type { Profile, UserType } from "@/app/_types/registration";
 
 /**
- * Buildathon is open to three cohorts — UNSW students, students at other
- * universities, and high schoolers — and which fields are required depends on
+ * Buildathon is open to three cohorts, UNSW students, students at other
+ * universities, and high schoolers, and which fields are required depends on
  * which cohort the entrant picked. There is no division/category concept here,
  * so nothing in this file gates on one.
  */
@@ -124,7 +124,7 @@ function validate(input: ProfileInput): string | null {
     return "High school is required";
   }
 
-  // University-specific details — not asked of high school students.
+  // University-specific details, not asked of high school students.
   if (input.user_type !== "high_school") {
     if (!input.year_of_study) return "Year of study is required";
     if (!input.degree_stage) return "Degree stage is required";
