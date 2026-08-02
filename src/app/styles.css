@@ -1,0 +1,323 @@
+@import url("https://fonts.googleapis.com/css2?family=Bitcount:wght@100..900&family=Saira+Condensed:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------- tokens -- */
+/*
+ * Buildathon 2026 runs a blueprint + LEGO theme: a deep drafting-blue ground
+ * ruled with a faint white grid, white "ink" type, and saturated LEGO brick
+ * colours as accents. LEGO yellow is the primary action colour — it is the
+ * highest-contrast accent available against blueprint blue.
+ */
+
+@theme inline {
+  /*
+   * The wordmark on the promo art is built from round dots, like LEGO studs on
+   * a baseplate — the same idea as Nothing's NDot, which is proprietary and
+   * can't be used here. Bitcount is an OFL variable font that draws every
+   * glyph out of round dots natively, so it holds up at any size rather than
+   * needing a clipped gradient.
+   */
+  --font-stud: "Bitcount", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Saira Condensed", ui-sans-serif, system-ui, sans-serif;
+  --font-main: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+  --font-pixel: "Silkscreen", "Saira Condensed", sans-serif;
+
+  /* Blueprint ground */
+  --color-blueprint-950: #04234f;
+  --color-blueprint-900: #072f6b;
+  --color-blueprint-850: #08376f;
+  --color-blueprint-800: #0a3d88;
+  --color-blueprint-700: #0e4ba6;
+  --color-blueprint-600: #1560c4;
+  --color-blueprint-500: #2c7ae0;
+
+  /* Drafting ink */
+  --color-ink: #eaf1ff;
+  --color-ink-dim: #a9c2e8;
+  --color-grid: rgb(255 255 255 / 0.1);
+  --color-grid-major: rgb(255 255 255 / 0.18);
+
+  /* LEGO brick accents */
+  --color-lego-yellow: #ffcf00;
+  --color-lego-orange: #f57c20;
+  --color-lego-red: #d9202a;
+  --color-lego-green: #4c9f38;
+  --color-lego-azure: #35a3e0;
+
+  /* shadcn-compatible semantic tokens consumed by the ui/ primitives */
+  --color-background: var(--color-blueprint-800);
+  --color-foreground: var(--color-ink);
+  --color-card: rgb(255 255 255 / 0.06);
+  --color-card-foreground: var(--color-ink);
+  --color-popover: #072f6b;
+  --color-popover-foreground: var(--color-ink);
+  --color-primary: var(--color-lego-yellow);
+  --color-primary-foreground: #0a2a55;
+  --color-secondary: rgb(255 255 255 / 0.08);
+  --color-secondary-foreground: var(--color-ink);
+  --color-muted: rgb(255 255 255 / 0.06);
+  --color-muted-foreground: var(--color-ink-dim);
+  --color-accent: rgb(255 255 255 / 0.12);
+  --color-accent-foreground: var(--color-ink);
+  --color-destructive: var(--color-lego-red);
+  --color-destructive-foreground: #ffffff;
+  --color-border: rgb(255 255 255 / 0.16);
+  --color-input: rgb(255 255 255 / 0.1);
+  --color-ring: var(--color-lego-yellow);
+
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+/* ------------------------------------------------------------ utilities -- */
+
+@utility font-display {
+  font-family: var(--font-display);
+  letter-spacing: 0.01em;
+}
+
+/*
+ * The dot-matrix wordmark face. Every glyph is drawn from round dots, so this
+ * is the LEGO-stud treatment — no gradient clipping needed.
+ *
+ * ELSH (element shape) 0 keeps the elements circular; ELXP (element expansion)
+ * 0 keeps them as discrete dots rather than merging into solid strokes.
+ */
+@utility font-stud {
+  font-family: var(--font-stud);
+  /*
+   * Weight drives dot diameter. Above ~500 adjacent dots touch and the
+   * wordmark reads as solid blobs instead of studs, so keep it light.
+   */
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+
+@utility font-main {
+  font-family: var(--font-main);
+}
+
+@utility font-blueprint {
+  font-family: var(--font-mono);
+  letter-spacing: 0.06em;
+}
+
+@utility font-pixel {
+  font-family: var(--font-pixel);
+}
+
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/*
+ * The ruled drafting grid: minor squares with a heavier major line every fifth.
+ * Applied to <body>, and reusable on any section that needs the ground.
+ */
+@utility blueprint-grid {
+  background-color: var(--color-blueprint-800);
+  background-image:
+    linear-gradient(var(--color-grid-major) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid-major) 1px, transparent 1px),
+    linear-gradient(var(--color-grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+  background-size:
+    120px 120px,
+    120px 120px,
+    24px 24px,
+    24px 24px;
+}
+
+/* A row of LEGO studs, for the top edge of "brick" surfaces. */
+@utility lego-studs {
+  position: relative;
+  &::before {
+    content: "";
+    position: absolute;
+    inset-inline: 0.75rem;
+    top: -0.4rem;
+    height: 0.8rem;
+    background-image: radial-gradient(
+      circle at 0.4rem 0.4rem,
+      currentColor 0.34rem,
+      transparent 0.35rem
+    );
+    background-size: 1.4rem 0.8rem;
+    background-repeat: repeat-x;
+    opacity: 0.9;
+    pointer-events: none;
+  }
+}
+
+/*
+ * A "brick": a solid slab with the chunky bottom shadow LEGO pieces cast.
+ * The shadow collapses on :active so buttons feel like they press down.
+ */
+@utility brick {
+  border-radius: var(--radius-lg);
+  box-shadow: 0 0.35rem 0 rgb(0 0 0 / 0.28);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease;
+  &:active {
+    transform: translateY(0.25rem);
+    box-shadow: 0 0.1rem 0 rgb(0 0 0 / 0.28);
+  }
+}
+
+/* Dashed drafting outline, as used around callouts on the promo art. */
+@utility drafting-frame {
+  border: 1px solid var(--color-grid-major);
+  outline: 1px solid var(--color-grid);
+  outline-offset: 0.35rem;
+}
+
+/* ----------------------------------------------------------------- base -- */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-blueprint-800);
+    background-image:
+      linear-gradient(var(--color-grid-major) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-grid-major) 1px, transparent 1px),
+      linear-gradient(var(--color-grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
+    background-size:
+      120px 120px,
+      120px 120px,
+      24px 24px,
+      24px 24px;
+    background-attachment: fixed;
+    color: var(--color-ink);
+    font-family: var(--font-main);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-wrap: balance;
+  }
+
+  /*
+   * Display headings (the wordmark and section titles) use the dotted face.
+   * h3/h4 stay on the condensed sans — they sit close to body copy and at
+   * those sizes the dot grid stops resolving into readable letterforms.
+   */
+  h1,
+  h2 {
+    font-family: var(--font-stud);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+  }
+
+  h3,
+  h4 {
+    font-family: var(--font-display);
+  }
+
+  h1 {
+    font-size: clamp(2.5rem, 7vw, 5.5rem);
+    line-height: 1.05;
+    letter-spacing: 0.005em;
+  }
+
+  h2 {
+    font-size: clamp(1.875rem, 4.2vw, 3.25rem);
+    line-height: 1.12;
+  }
+
+  h3 {
+    font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+    line-height: 1.1;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  input,
+  select,
+  textarea {
+    font-family: var(--font-main);
+  }
+
+  ::selection {
+    background: var(--color-lego-yellow);
+    color: #0a2a55;
+  }
+}
+
+/* ----------------------------------------------------------- components -- */
+
+@layer components {
+  /* Primary CTA — a yellow LEGO brick. */
+  .button {
+    @apply brick font-display inline-flex min-h-[44px] items-center justify-center gap-2 px-6 py-3 text-lg font-bold tracking-wide uppercase;
+    background-color: var(--color-lego-yellow);
+    color: #0a2a55;
+  }
+
+  .button:hover {
+    background-color: #ffd928;
+  }
+
+  .button-outline {
+    @apply font-display inline-flex min-h-[44px] items-center justify-center gap-2 rounded-lg border px-6 py-3 text-lg font-bold tracking-wide uppercase;
+    border-color: var(--color-grid-major);
+    color: var(--color-ink);
+  }
+
+  .button-outline:hover {
+    background-color: rgb(255 255 255 / 0.08);
+  }
+
+  .text-link {
+    color: var(--color-lego-yellow);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  .text-link:hover {
+    color: #ffd928;
+  }
+
+  /* Technical label, as annotated on engineering drawings. */
+  .spec-label {
+    @apply font-blueprint text-xs uppercase;
+    color: var(--color-ink-dim);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
