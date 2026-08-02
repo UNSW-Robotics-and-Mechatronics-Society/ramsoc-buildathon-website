@@ -50,12 +50,16 @@ Payments are linked back to a team through Square's `referenceId` field, which
 carries the team UUID. The human-readable `note` is decorative, so its wording
 is safe to change.
 
-**Apple Pay needs one manual step before it will work.** Register the
-Buildathon domain in the Square dashboard, download the domain association
-file it generates, and save it to
-`public/.well-known/apple-developer-merchantid-domain-association`. It is
-deliberately not in this repo — Sumobots' copy is bound to a different domain
-and would fail verification.
+**Apple Pay** is verified by the file at
+`public/.well-known/apple-developer-merchantid-domain-association`, which is
+served at the domain root and issued by Square for
+`buildathon.ramsocunsw.org`. It is committed deliberately: it is a public
+verification file, not a secret.
+
+It is bound to that exact domain, so if the site ever moves, re-register the new
+domain in the Square dashboard and replace this file with the one it issues.
+Do not copy Sumobots' version; it is bound to a different domain and will fail
+verification.
 
 ## Layout
 
