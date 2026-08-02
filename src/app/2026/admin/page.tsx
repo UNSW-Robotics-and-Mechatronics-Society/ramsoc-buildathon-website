@@ -37,7 +37,7 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-sm">
         {/* A yellow brick with studs, the one piece of set-dressing in the
             admin area, since the login screen has no data to compete with. */}
-        <div className="lego-studs text-lego-yellow">
+        <div className="lego-studs [--stud-color:var(--color-blueprint-900)]">
           <div className="brick drafting-frame bg-blueprint-900 p-6">
             <p className="spec-label">RAMSoc Buildathon 2026</p>
             <h1 className="mt-1 mb-1 text-3xl">Admin Console</h1>

@@ -47,6 +47,10 @@ create table profiles (
   heard_from             text,
   heard_from_other       text,
 
+  -- Free text. Catering runs at the kick-off and presentation nights, so this
+  -- has to cover allergies and intolerances, not just a fixed diet list.
+  dietary_requirements   text,
+
   onboarded              boolean not null default false,
   created_at             timestamptz not null default now(),
   updated_at             timestamptz not null default now()

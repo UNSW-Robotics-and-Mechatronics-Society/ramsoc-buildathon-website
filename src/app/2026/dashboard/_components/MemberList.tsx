@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { TeamMember, Profile } from "@/app/_types/registration";
 import Card from "@/app/2026/_components/ui/Card";
-import Badge from "@/app/2026/_components/ui/Badge";
 import { Button } from "@/app/2026/_components/ui/Button";
 import { promoteMember, kickMember } from "@/app/2026/_actions/team";
 import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
@@ -12,17 +11,39 @@ import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
 type MemberWithProfile = TeamMember & { profile: Profile };
 
 /**
- * Brick colourways. Written as literal class strings so Tailwind's scanner
- * keeps them, never build these names by interpolation.
+ * Brick colourways: solid, like real bricks. A filled seat should look filled,
+ * and the earlier translucent tints read as disabled. Empty seats are the ones
+ * that get the greyed-out treatment, further down.
+ *
+ * Written as literal class strings so Tailwind's scanner keeps them, never
+ * build these names by interpolation.
  */
-const CAPTAIN_BRICK = "bg-lego-yellow/20 text-lego-yellow";
+const BRICK_INK = "text-[#06264d]";
+const CAPTAIN_BRICK = "bg-lego-yellow";
+
+/*
+ * Five colourways, one per non-captain seat. Coral stands in for LEGO red:
+ * the real red is too dark for the shared brick ink, so it would need white
+ * text and be the one brick that reads differently.
+ */
 const MEMBER_BRICKS = [
-  "bg-lego-azure/20 text-lego-azure",
-  "bg-lego-green/20 text-lego-green",
-  "bg-lego-orange/20 text-lego-orange",
-  "bg-lego-red/20 text-lego-red",
-  "bg-lego-azure/20 text-lego-azure",
+  "bg-lego-azure",
+  "bg-lego-coral",
+  "bg-lego-lime",
+  "bg-lego-purple",
+  "bg-lego-orange",
 ];
+
+/**
+ * Roster actions sit on top of a saturated brick. A translucent black wash
+ * reads as a darker shade of whichever brick is underneath, so one class works
+ * across the whole rotation without picking a colour per brick.
+ */
+const ROSTER_ACTION =
+  "font-display inline-flex min-h-[36px] items-center justify-center rounded-md bg-black/20 px-3 text-xs font-bold tracking-wide text-current uppercase transition-colors hover:bg-black/30 focus-visible:ring-2 focus-visible:ring-white/70 outline-none";
+
+/** Keeps filled bricks and empty slots the same height so the stack lines up. */
+const BRICK_HEIGHT = "min-h-[4rem]";
 
 /** What to show under a member's name, depending on their cohort. */
 function affiliation(profile: Profile): string {
@@ -97,24 +118,26 @@ export default function MemberList({
 
           return (
             <li key={member.id}>
-              {/* The brick itself: currentColor drives the stud row above it. */}
+              {/* The stud row above inherits this brick’s background colour. */}
               <div
-                className={`lego-studs brick flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 sm:px-4 ${brick}`}
+                className={`lego-studs brick ${BRICK_HEIGHT} ${BRICK_INK} flex flex-wrap items-center gap-x-3 gap-y-2 px-3 py-3 sm:px-4 ${brick}`}
               >
                 <div className="min-w-0 flex-1">
-                  <p className="font-main text-ink truncate text-sm font-semibold">
+                  <p className="font-main truncate text-sm font-semibold text-current">
                     {member.profile.full_name}
                   </p>
                   {sub && (
-                    <p className="font-blueprint text-ink-dim truncate text-[0.65rem] uppercase">
+                    <p className="font-blueprint truncate text-[0.65rem] text-current uppercase opacity-75">
                       {sub}
                     </p>
                   )}
                 </div>
 
-                <div className="flex shrink-0 items-center gap-1.5">
+                <div className="flex shrink-0 items-center gap-2">
                   {member.role === "captain" && (
-                    <Badge variant="warning">Captain</Badge>
+                    <span className="font-blueprint text-lego-yellow rounded-full bg-[#0a2a55] px-2.5 py-1 text-[0.65rem] uppercase">
+                      Captain
+                    </span>
                   )}
                   {canManage && (
                     <>
@@ -127,7 +150,7 @@ export default function MemberList({
                             name: member.profile.full_name,
                           })
                         }
-                        className="font-blueprint text-ink-dim hover:text-ink inline-flex min-h-[44px] items-center rounded px-2 text-[0.65rem] uppercase transition-colors hover:bg-white/10"
+                        className={ROSTER_ACTION}
                       >
                         Promote
                       </button>
@@ -140,7 +163,7 @@ export default function MemberList({
                             name: member.profile.full_name,
                           })
                         }
-                        className="font-blueprint text-lego-red inline-flex min-h-[44px] items-center rounded px-2 text-[0.65rem] uppercase transition-colors hover:bg-white/10 hover:brightness-125"
+                        className={`${ROSTER_ACTION} hover:!bg-lego-red hover:text-white`}
                       >
                         Remove
                       </button>
@@ -151,13 +174,19 @@ export default function MemberList({
             </li>
           );
         })}
-      </ul>
 
-      {slotsLeft > 0 && (
-        <p className="font-blueprint text-ink-dim mt-4 rounded-lg border border-dashed border-white/20 px-3 py-2.5 text-center text-[0.65rem] uppercase">
-          {slotsLeft} slot{slotsLeft !== 1 ? "s" : ""} remaining
-        </p>
-      )}
+        {/* Unfilled seats: greyed, see-through bricks so the roster reads as
+            a part-built stack rather than a finished one. */}
+        {Array.from({ length: slotsLeft }, (_, i) => (
+          <li key={`slot-${i}`}>
+            <div className={`lego-studs ${BRICK_HEIGHT} flex items-center gap-3 rounded-lg border border-dashed border-white/25 bg-white/5 px-3 py-3 sm:px-4 [--stud-color:rgba(255,255,255,0.14)]`}>
+              <span className="font-blueprint text-ink-dim text-[0.65rem] uppercase opacity-80">
+                Empty slot
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
 
       {confirmAction && (
         <div

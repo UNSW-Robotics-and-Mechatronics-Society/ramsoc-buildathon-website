@@ -131,6 +131,7 @@ export default function ProfileTab({
             </>
           )}
           <SpecRow label="Phone" value={profile.phone} />
+          <SpecRow label="Dietary" value={profile.dietary_requirements} />
         </dl>
       </Card>
 

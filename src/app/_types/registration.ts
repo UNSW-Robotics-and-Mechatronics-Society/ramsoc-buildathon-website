@@ -31,6 +31,7 @@ export type Profile = {
   gender_other: string;
   heard_from: string;
   heard_from_other: string;
+  dietary_requirements: string;
 
   onboarded: boolean;
   created_at: string;

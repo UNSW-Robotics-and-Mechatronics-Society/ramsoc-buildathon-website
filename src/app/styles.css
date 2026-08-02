@@ -49,6 +49,16 @@
   --color-lego-green: #4c9f38;
   --color-lego-azure: #35a3e0;
 
+  /*
+   * Extra brick colourways for the roster. These are deliberately lighter than
+   * the accents above so the shared dark brick ink (#06264d) clears 4.5:1 on
+   * every one of them. Note lego-red is too dark for that ink, which is why
+   * coral exists rather than reusing it.
+   */
+  --color-lego-coral: #ff6f61;
+  --color-lego-purple: #b18cf0;
+  --color-lego-lime: #c2e02c;
+
   /* shadcn-compatible semantic tokens consumed by the ui/ primitives */
   --color-background: var(--color-blueprint-800);
   --color-foreground: var(--color-ink);
@@ -138,23 +148,65 @@
     24px 24px;
 }
 
-/* A row of LEGO studs, for the top edge of "brick" surfaces. */
+/*
+ * A row of LEGO studs along the top edge of a "brick" surface.
+ *
+ * Seen face-on from the side, studs are small rectangular tabs rather than
+ * circles, so this is a hard-edged repeating gradient.
+ *
+ * The studs take the brick's own body colour via `background-color: inherit`,
+ * which resolves to the parent's computed background. That keeps the two in
+ * step automatically, including for translucent tints like `bg-lego-azure/20`.
+ * A brick with no background of its own can set `--stud-color` instead.
+ */
 @utility lego-studs {
+  --stud-width: 0.72rem;
+  --stud-gap: 0.58rem;
+  --stud-inset: 0.7rem;
+  --stud-height: 0.36rem;
   position: relative;
+
   &::before {
     content: "";
     position: absolute;
-    inset-inline: 0.75rem;
-    top: -0.4rem;
-    height: 0.8rem;
-    background-image: radial-gradient(
-      circle at 0.4rem 0.4rem,
-      currentColor 0.34rem,
-      transparent 0.35rem
+
+    /*
+     * Sit exactly flush on top of the brick, never overlapping it. Bricks are
+     * often a translucent tint (bg-lego-azure/20), and any overlap composites
+     * the stud over the body twice, drawing a brighter line along the brick's
+     * top edge.
+     */
+    top: calc(var(--stud-height) * -1);
+    height: var(--stud-height);
+    background-color: var(--stud-color, inherit);
+
+    /*
+     * Each tile is one stud followed by one gap, tiled with `space` rather
+     * than `repeat`: `space` only ever draws whole tiles, so the row can never
+     * end on a stud sliced in half by the brick edge.
+     *
+     * That leaves a trailing gap inside the strip, which would read as the row
+     * petering out before the right edge. Pulling the strip's right edge in by
+     * one gap puts the last stud the same distance from the brick edge as the
+     * first, so the row starts and ends on a stud.
+     */
+    inset-inline-start: var(--stud-inset);
+    inset-inline-end: calc(var(--stud-inset) - var(--stud-gap));
+
+    -webkit-mask-image: linear-gradient(
+      to right,
+      #000 0 var(--stud-width),
+      transparent var(--stud-width)
     );
-    background-size: 1.4rem 0.8rem;
-    background-repeat: repeat-x;
-    opacity: 0.9;
+    mask-image: linear-gradient(
+      to right,
+      #000 0 var(--stud-width),
+      transparent var(--stud-width)
+    );
+    -webkit-mask-size: calc(var(--stud-width) + var(--stud-gap)) 100%;
+    mask-size: calc(var(--stud-width) + var(--stud-gap)) 100%;
+    -webkit-mask-repeat: space;
+    mask-repeat: space;
     pointer-events: none;
   }
 }
@@ -193,19 +245,12 @@
     scroll-behavior: smooth;
   }
 
+  /*
+   * Only the flat ground colour lives here. The ruled grid is drawn by
+   * <BlueprintBackdrop />, a fixed layer that parallaxes on scroll.
+   */
   body {
     background-color: var(--color-blueprint-800);
-    background-image:
-      linear-gradient(var(--color-grid-major) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-grid-major) 1px, transparent 1px),
-      linear-gradient(var(--color-grid) 1px, transparent 1px),
-      linear-gradient(90deg, var(--color-grid) 1px, transparent 1px);
-    background-size:
-      120px 120px,
-      120px 120px,
-      24px 24px,
-      24px 24px;
-    background-attachment: fixed;
     color: var(--color-ink);
     font-family: var(--font-main);
     -webkit-font-smoothing: antialiased;

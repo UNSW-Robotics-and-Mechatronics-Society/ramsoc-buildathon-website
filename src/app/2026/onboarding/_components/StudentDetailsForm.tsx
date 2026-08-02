@@ -460,6 +460,7 @@ export default function StudentDetailsForm({
       is_arc_member: isUnsw && isArcMember,
       heard_from: heardFrom,
       heard_from_other: heardFrom === "other" ? heardFromOther : "",
+      dietary_requirements: (form.get("dietary_requirements") as string) || "",
       phone: (form.get("phone") as string) || "",
     });
 
@@ -828,6 +829,14 @@ export default function StudentDetailsForm({
           />
         </Field>
       )}
+
+      <Field delay={nextDelay()}>
+        <Input
+          label="Dietary requirements"
+          name="dietary_requirements"
+          placeholder="Allergies or intolerances, or leave blank"
+        />
+      </Field>
 
       <Field delay={nextDelay()}>
         <Input

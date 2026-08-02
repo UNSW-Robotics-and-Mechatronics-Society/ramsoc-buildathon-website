@@ -240,6 +240,7 @@ export default function EditProfileForm({
       is_arc_member: isUnsw && isArcMember,
       heard_from: heardFrom,
       heard_from_other: heardFrom === "other" ? heardFromOther : "",
+      dietary_requirements: (form.get("dietary_requirements") as string) || "",
       phone: (form.get("phone") as string) || "",
     });
 
@@ -468,6 +469,13 @@ export default function EditProfileForm({
         autoComplete="tel"
         placeholder="04XX XXX XXX"
         defaultValue={profile.phone}
+      />
+
+      <Input
+        label="Dietary requirements"
+        name="dietary_requirements"
+        placeholder="Allergies or intolerances, or leave blank"
+        defaultValue={profile.dietary_requirements}
       />
 
       {error && (

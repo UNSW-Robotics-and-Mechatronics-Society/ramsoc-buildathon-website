@@ -45,6 +45,7 @@ export type ProfileInput = {
   gender_other: string;
   heard_from: string;
   heard_from_other: string;
+  dietary_requirements: string;
 };
 
 /** Every profiles column this action owns, with cohort-safe defaults. */
@@ -69,6 +70,7 @@ const EMPTY_INPUT: ProfileInput = {
   gender_other: "",
   heard_from: "",
   heard_from_other: "",
+  dietary_requirements: "",
 };
 
 // ── getProfile ───────────────────────────────────────────────────────────────
@@ -195,6 +197,7 @@ function toRow(input: ProfileInput) {
     heard_from: input.heard_from,
     heard_from_other:
       input.heard_from === "other" ? input.heard_from_other.trim() : "",
+    dietary_requirements: input.dietary_requirements.trim(),
   };
 }
 
@@ -293,6 +296,7 @@ export async function updateProfile(
     gender_other: stored.gender_other ?? "",
     heard_from: stored.heard_from ?? "",
     heard_from_other: stored.heard_from_other ?? "",
+    dietary_requirements: stored.dietary_requirements ?? "",
     ...input,
   };
 
