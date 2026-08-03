@@ -16,10 +16,12 @@ export type Sponsor = {
 
 export const SPONSORS: Sponsor[] = [
   {
+    // Official wordmark from unswfounders.com, not the UNSW co-branded tile.
+    // Transparent with dark type, so it needs a light plate.
     name: "UNSW Founders",
     logo: "/2026/sponsors/unsw-founders-logo.png",
-    url: "https://www.founders.unsw.edu.au/",
-    plate: "lockup",
+    url: "https://unswfounders.com/",
+    plate: "white",
   },
   {
     name: "UNSW Engineering",

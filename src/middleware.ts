@@ -1,5 +1,6 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
+import Path from "@/app/path";
 
 const isProtectedRoute = createRouteMatcher([
   "/2026/dashboard(.*)",
@@ -24,7 +25,18 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isProtectedRoute(req)) {
-    await auth.protect();
+    /*
+     * Redirect signed-out visitors to sign-in explicitly rather than calling
+     * auth.protect(), which responds 404 to them. A 404 on /dashboard reads as
+     * a broken link, and it leaves someone who followed a bookmark with no way
+     * back in. redirect_url brings them to where they were headed afterwards.
+     */
+    const { userId } = await auth();
+    if (!userId) {
+      const signIn = new URL(Path[2026].SignIn, req.url);
+      signIn.searchParams.set("redirect_url", req.url);
+      return NextResponse.redirect(signIn);
+    }
   }
 });
 
