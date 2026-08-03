@@ -388,7 +388,7 @@ const adminTasks: AdminTask[] = [
   {
     id: "task-2",
     title: "Submit your one-page build brief",
-    description: "Which SDG you are targeting and what you plan to build.",
+    description: "What you plan to build and how it answers the brief.",
     url: "",
     active: true,
     created_at: "2026-02-06T01:00:00Z",

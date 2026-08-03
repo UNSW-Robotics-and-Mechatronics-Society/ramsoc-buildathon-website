@@ -9,7 +9,7 @@ const STEPS = [
   {
     n: "02",
     title: "Get the brief and a kit",
-    body: "Build something that helps deliver a UN Sustainable Development Goal. Every team starts with an ESP32, a breadboard and a handful of components on kick-off night.",
+    body: "The brief is announced on kick-off night, along with your kit: an ESP32, a breadboard and a handful of components to start from.",
   },
   {
     n: "03",

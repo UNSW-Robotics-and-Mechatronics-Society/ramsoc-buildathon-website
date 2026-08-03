@@ -12,7 +12,7 @@ export const FAQS: Faq[] = [
   {
     question: "What is the brief?",
     answer:
-      "Build something that helps deliver one of the UN Sustainable Development Goals. That is deliberately wide: past ideas have ranged from water quality monitors and solar trackers to accessibility devices and bushfire sensors. You pick the goal and you pick the problem, and the judges look at how well your build actually addresses it.",
+      "The brief is announced on kick-off night in Week 1, and it changes each year. It is deliberately wide: you pick the problem you want to solve, and the judges look at how well your build actually addresses it. Past entries have ranged from water quality monitors and solar trackers to accessibility devices and bushfire sensors.",
   },
   {
     question: "Who can enter?",

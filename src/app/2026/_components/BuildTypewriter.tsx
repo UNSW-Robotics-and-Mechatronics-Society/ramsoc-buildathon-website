@@ -95,8 +95,7 @@ export default function BuildTypewriter() {
             </span>
             <span className="sr-only">
               something that matters, like a solar tracker, a flood warning
-              beacon, a water-quality buoy, or anything else that moves a UN
-              Sustainable Development Goal forward.
+              beacon, a water-quality buoy, or whatever the brief calls for.
             </span>
           </>
         )}

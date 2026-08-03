@@ -31,12 +31,11 @@ export default function Hero() {
 
           <p className="text-ink-dim mb-8 max-w-xl text-lg">
             A six-week mechatronics hackathon. Form a team, get a kit, and build
-            something that pushes a UN Sustainable Development Goal forward. No
-            experience needed.
+            something to the brief. No experience needed.
           </p>
 
-          {/* Spec block, drafted like a title block on an engineering drawing. */}
-          {/* Solid-ish surface so the ruled grid does not run through the figures. */}
+          {/* Spec block, drafted like the title block on an engineering drawing.
+              Solid-ish surface so the ruled grid does not run through the figures. */}
           <dl className="drafting-frame bg-blueprint-900/85 mb-9 inline-block rounded-lg px-5 py-4 backdrop-blur-sm">
             {SPECS.map((spec) => (
               <div
