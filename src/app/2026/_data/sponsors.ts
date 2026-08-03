@@ -28,6 +28,14 @@ export const SPONSORS: Sponsor[] = [
     plate: "lockup",
   },
   {
+    // Sourced from unswwit.carrd.co and trimmed to its content. The wordmark is
+    // black serif, so it needs a light plate.
+    name: "UNSW Women in Technology",
+    logo: "/2026/sponsors/unsw-wit-logo.png",
+    url: "https://unswwit.carrd.co/",
+    plate: "white",
+  },
+  {
     name: "Arc UNSW",
     logo: "/2026/sponsors/unsw_arc_logo_green_outline.svg",
     url: "https://www.arc.unsw.edu.au/",
