@@ -12,16 +12,23 @@ export type Sponsor = {
    * square and cover-cropping cuts it off.
    */
   plate: "white" | "black" | "unsw-yellow" | "lockup";
+  /**
+   * Exact tile background, for square artwork that is full bleed in its own
+   * colour. Matching the tile to the artwork makes the two blend, so the mark
+   * reads as filling the tile instead of sitting as a small square on white.
+   */
+  bg?: string;
 };
 
 export const SPONSORS: Sponsor[] = [
   {
-    // Official wordmark from unswfounders.com, not the UNSW co-branded tile.
-    // Transparent with dark type, so it needs a light plate.
+    // The Founders "U" monogram, supplied by RAMSoc. Full bleed in its own
+    // yellow, so the tile takes that exact colour.
     name: "UNSW Founders",
-    logo: "/2026/sponsors/unsw-founders-logo.png",
+    logo: "/2026/sponsors/unsw-founders-monogram.png",
     url: "https://unswfounders.com/",
-    plate: "white",
+    plate: "lockup",
+    bg: "#fedc01",
   },
   {
     name: "UNSW Engineering",

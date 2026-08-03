@@ -22,7 +22,10 @@ export default function Sponsors() {
             // cover-cropped into a wide tile.
             const logo =
               sponsor.plate === "lockup" ? (
-                <div className="relative h-28 overflow-hidden rounded-xl bg-white">
+                <div
+                  className="relative h-28 overflow-hidden rounded-xl bg-white"
+                  style={sponsor.bg ? { backgroundColor: sponsor.bg } : undefined}
+                >
                   <Image
                     src={sponsor.logo}
                     alt={sponsor.name}
