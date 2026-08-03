@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ExternalLink } from "lucide-react";
 import {
   WORKSHOP_RESOURCES,
   EXTERNAL_RESOURCES,
@@ -23,11 +24,23 @@ function ResourceCard({ resource }: { resource: Resource }) {
           className="object-cover transition-transform duration-300 group-hover:scale-105"
         />
       </div>
-      <div className="flex-1 p-4">
+      <div className="flex flex-1 flex-col p-4">
         <h3 className="text-ink group-hover:text-lego-yellow mb-1 text-base transition-colors">
           {resource.title}
         </h3>
-        <p className="text-ink-dim text-sm">{resource.description}</p>
+        <p className="text-ink-dim mb-3 text-sm">{resource.description}</p>
+
+        {/* Explicit affordance: the card is a link, and without a visible cue
+            people read it as a static tile and never click it. */}
+        <span className="font-blueprint text-lego-yellow mt-auto inline-flex items-center gap-1.5 text-[0.7rem] uppercase group-hover:underline">
+          {resource.kind === "video"
+            ? "Watch"
+            : resource.kind === "slides"
+              ? "Open slides"
+              : "Open"}
+          <ExternalLink size={12} aria-hidden />
+          <span className="sr-only">(opens in a new tab)</span>
+        </span>
       </div>
     </a>
   );
@@ -40,7 +53,7 @@ export default function Resources() {
         <p className="spec-label mb-3">Section C · Reference</p>
         <h2 className="text-ink mb-4">Resources</h2>
         <p className="text-ink-dim mb-10 max-w-2xl text-lg">
-          Slides and recordings go up here as each workshop runs.
+          Slides and recordings for each workshop. Some are carried over from previous years and cover the same ground; 2026 material is added as each session runs.
         </p>
 
         <h3 className="text-ink mb-4">Workshop material</h3>

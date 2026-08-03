@@ -3,31 +3,45 @@ export type Resource = {
   description: string;
   href: string;
   image: string;
+  /** Drives the call to action on the card, so people know what they will get. */
+  kind: "video" | "slides" | "link";
 };
 
 /**
- * Workshop material, published as each week runs. Links below are carried over
- * from 2025 and should be replaced with the 2026 slide decks as they go up.
+ * Workshop material. These are the 2025 recordings and decks, which still cover
+ * the same ground: they are carried over so the resources page is useful from
+ * day one. Replace each href as the 2026 session material goes up.
  */
 export const WORKSHOP_RESOURCES: Resource[] = [
   {
     title: "Arduino Workshop Slides",
     description: "Introduction to the Arduino IDE and the ESP32.",
-    href: "https://docs.google.com/presentation/d/1Xk8VHhQXKzKZ8-placeholder",
+    href: "https://docs.google.com/presentation/d/1Wm3WR9b7rzX5lQ9OzO9Xj3d2U1WqkG0myFVm457qXbU/edit?usp=sharing",
     image: "/2026/resources/week1.png",
+    kind: "slides",
   },
   {
     title: "Introduction to CAD",
     description: "Basic CAD using Onshape, from sketch to printable part.",
-    href: "https://www.youtube.com/watch?v=placeholder",
+    href: "https://www.youtube.com/watch?v=2V1Y9ENvDSM",
     image: "/2026/resources/cad.jpg",
+    kind: "video",
   },
   {
     title: "Motor Control",
     description:
       "Using an Arduino and the L298N motor driver to get your motors spinning.",
-    href: "https://www.youtube.com/watch?v=placeholder",
+    href: "https://www.youtube.com/watch?v=PFLQC4x5NoQ",
     image: "/2026/resources/motor.jpg",
+    kind: "video",
+  },
+  {
+    title: "Arduino Basics",
+    description:
+      "The basics of getting code written and uploaded to your board.",
+    href: "https://www.youtube.com/watch?v=Qaol1ywlcjQ",
+    image: "/2026/resources/arduino-vid.jpg",
+    kind: "video",
   },
 ];
 
@@ -38,12 +52,15 @@ export const EXTERNAL_RESOURCES: Resource[] = [
       "Install the Arduino IDE before the first workshop so you are ready to flash.",
     href: "https://www.arduino.cc/en/software",
     image: "/2026/resources/arduino.png",
+    kind: "link",
   },
   {
     title: "ESP32 Pinout Reference",
-    description: "Which pin does what on the ESP32 dev board in your kit.",
+    description:
+      "Which pin does what on the ESP32 dev board in your kit, and which ones to avoid.",
     href: "https://lastminuteengineers.com/esp32-pinout-reference/",
-    image: "/2026/resources/arduino-vid.jpg",
+    image: "/2026/brand/components.jpg",
+    kind: "link",
   },
 ];
 

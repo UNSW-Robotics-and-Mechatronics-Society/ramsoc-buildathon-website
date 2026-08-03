@@ -3,19 +3,30 @@ export type Sponsor = {
   logo: string;
   url?: string;
   /**
-   * Plate colour behind the logo. These are fixed-colour brand marks, so each
-   * needs the background it was drawn for, Arc's green outline and Engineers
-   * Australia read on white, the UNSW school marks on UNSW yellow, and ANT61's
-   * white wordmark needs black.
+   * How the logo sits in its tile.
+   *
+   * `white` / `black` / `unsw-yellow` are plate colours for transparent marks,
+   * each needing the background it was drawn for. `lockup` is for supplied
+   * square artwork that already carries its own background: it is shown whole
+   * on white, never cropped, because the wordmark sits at the bottom of the
+   * square and cover-cropping cuts it off.
    */
-  plate: "white" | "black" | "unsw-yellow";
+  plate: "white" | "black" | "unsw-yellow" | "lockup";
 };
 
-/**
- * Carried over from the Sumobots 2026 partner set. `yokogawa-logo.png` is the
- * file Sumobots stored as `icon.png`, same artwork, saner name.
- */
 export const SPONSORS: Sponsor[] = [
+  {
+    name: "UNSW Founders",
+    logo: "/2026/sponsors/unsw-founders-logo.png",
+    url: "https://www.founders.unsw.edu.au/",
+    plate: "lockup",
+  },
+  {
+    name: "UNSW Engineering",
+    logo: "/2026/sponsors/unsw-engineering-logo.png",
+    url: "https://www.unsw.edu.au/engineering",
+    plate: "lockup",
+  },
   {
     name: "Arc UNSW",
     logo: "/2026/sponsors/unsw_arc_logo_green_outline.svg",
@@ -32,12 +43,6 @@ export const SPONSORS: Sponsor[] = [
     name: "UNSW School of Mechanical and Manufacturing Engineering",
     logo: "/2026/sponsors/unsw_mech_school_logo.svg",
     url: "https://www.unsw.edu.au/engineering/mechanical-manufacturing-engineering",
-    plate: "unsw-yellow",
-  },
-  {
-    name: "UNSW School of Electrical Engineering and Telecommunications",
-    logo: "/2026/sponsors/unsw_eet_logo.svg",
-    url: "https://www.unsw.edu.au/engineering/electrical-engineering-telecommunications",
     plate: "unsw-yellow",
   },
   {

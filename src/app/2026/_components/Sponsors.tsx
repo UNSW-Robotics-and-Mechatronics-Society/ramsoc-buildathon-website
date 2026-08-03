@@ -2,7 +2,7 @@ import Image from "next/image";
 import { SPONSORS, type Sponsor } from "@/app/2026/_data/sponsors";
 
 /** Each mark is a fixed-colour brand asset, so it gets the plate it was drawn for. */
-const PLATE: Record<Sponsor["plate"], string> = {
+const PLATE: Record<Exclude<Sponsor["plate"], "lockup">, string> = {
   white: "bg-white",
   black: "bg-black",
   "unsw-yellow": "bg-[#FDDD00]",
@@ -17,19 +17,33 @@ export default function Sponsors() {
 
         <ul className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {SPONSORS.map((sponsor) => {
-            const logo = (
-              <div
-                className={`flex h-28 items-center justify-center rounded-xl p-5 ${PLATE[sponsor.plate]}`}
-              >
-                <Image
-                  src={sponsor.logo}
-                  alt={sponsor.name}
-                  width={200}
-                  height={100}
-                  className="max-h-full w-auto object-contain"
-                />
-              </div>
-            );
+            // Supplied square lockups carry their own background and put the
+            // wordmark at the bottom, so they must be shown whole rather than
+            // cover-cropped into a wide tile.
+            const logo =
+              sponsor.plate === "lockup" ? (
+                <div className="relative h-28 overflow-hidden rounded-xl bg-white">
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    fill
+                    sizes="(max-width: 640px) 50vw, 25vw"
+                    className="object-contain"
+                  />
+                </div>
+              ) : (
+                <div
+                  className={`flex h-28 items-center justify-center rounded-xl p-5 ${PLATE[sponsor.plate]}`}
+                >
+                  <Image
+                    src={sponsor.logo}
+                    alt={sponsor.name}
+                    width={200}
+                    height={100}
+                    className="max-h-full w-auto object-contain"
+                  />
+                </div>
+              );
 
             return (
               <li key={sponsor.name}>
