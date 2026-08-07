@@ -63,6 +63,12 @@ export const SPONSORS: Sponsor[] = [
     plate: "unsw-yellow",
   },
   {
+    name: "UNSW School of Electrical Engineering and Telecommunications",
+    logo: "/2026/sponsors/unsw_eet_logo.svg",
+    url: "https://www.unsw.edu.au/engineering/electrical-engineering-telecommunications",
+    plate: "unsw-yellow",
+  },
+  {
     name: "Engineers Australia",
     logo: "/2026/sponsors/engineers_australia_logo.svg",
     url: "https://www.engineersaustralia.org.au/",
