@@ -7,11 +7,23 @@ export const KEY_DATES = {
   // Registration closes the night before the Week 1 kick-off, so the roster is
   // settled before anyone walks into MCIC.
   closes: new Date("2026-09-14T23:59:59+10:00"),
-  paymentDeadline: new Date("2026-10-05T23:59:59+11:00"),
+  // Payment closes with registration, which means the end of the grace period
+  // below rather than the published date, so a last-minute team can still pay.
+  paymentDeadline: new Date("2026-09-15T23:59:59+10:00"),
   competitionStarts: new Date("2026-09-15T18:00:00+10:00"),
   // Projects are in before the Week 6 closing presentations, same day.
   projectDeadline: new Date("2026-10-23T10:00:00+11:00"),
 } as const;
+
+/**
+ * How long sign-ups keep working after the published close.
+ *
+ * Deliberately not advertised anywhere: the hero counts down to the published
+ * date, and a deadline nobody believes is not a deadline. It exists so that
+ * someone who leaves it to the last minute is not turned away over a few
+ * hours.
+ */
+export const GRACE_PERIOD_HOURS = 24;
 
 /** The registration window, which is all `getRegistrationStatus` needs. */
 export type RegistrationDates = {
@@ -27,10 +39,15 @@ export type KeyDates = RegistrationDates & {
 };
 
 export type RegistrationStatus = {
-  /** Registration window is currently accepting new teams and members. */
+  /**
+   * Still accepting new teams and members. Stays true through the grace
+   * period, so this is the flag to gate sign-up on.
+   */
   isOpen: boolean;
   /** Registration has not started yet. */
   isUpcoming: boolean;
+  /** Past the published close, but inside the grace period. */
+  inGracePeriod: boolean;
   /** Captains can still pay the entry fee. */
   paymentOpen: boolean;
   /** The soonest upcoming deadline, for countdown display. */
@@ -42,8 +59,13 @@ export function getRegistrationStatus(
   now = new Date(),
   dates: RegistrationDates = KEY_DATES,
 ): RegistrationStatus {
+  const graceCloses = new Date(
+    dates.closes.getTime() + GRACE_PERIOD_HOURS * 60 * 60 * 1000,
+  );
+
   const isUpcoming = now < dates.opens;
-  const isOpen = now >= dates.opens && now < dates.closes;
+  const isOpen = now >= dates.opens && now < graceCloses;
+  const inGracePeriod = now >= dates.closes && now < graceCloses;
   const paymentOpen = now < dates.paymentDeadline;
 
   const upcoming = [
@@ -57,6 +79,7 @@ export function getRegistrationStatus(
   return {
     isOpen,
     isUpcoming,
+    inGracePeriod,
     paymentOpen,
     nextDeadline: upcoming[0]?.date ?? null,
     nextDeadlineLabel: upcoming[0]?.label ?? null,
