@@ -10,15 +10,17 @@ export type { TimelineAccent };
 
 /**
  * The editable slice of `app_config`. Buildathon has no season/phase system ,
- * a single registration window plus a payment deadline is the whole of it.
- * Dates are carried as ISO strings so they cross the server/client boundary
- * unambiguously.
+ * a single registration window, a payment deadline and the two competition
+ * milestones the hero counts down to is the whole of it. Dates are carried as
+ * ISO strings so they cross the server/client boundary unambiguously.
  */
 export type AdminAppConfig = {
   competition_year: number;
   registration_opens: string | null;
   registration_closes: string | null;
   payment_deadline: string | null;
+  competition_starts: string | null;
+  project_deadline: string | null;
   updated_at: string | null;
 };
 

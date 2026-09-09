@@ -2,7 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import Path from "@/app/path";
 import BuildTypewriter from "@/app/2026/_components/BuildTypewriter";
+import CountdownStages from "@/app/2026/_components/CountdownStages";
+import { getAppConfig } from "@/app/2026/_actions/appConfig";
 import { DISCORD_INVITE } from "@/app/2026/_data/socials";
+import {
+  getCountdownStages,
+  resolveCountdownPhase,
+} from "@/app/2026/_data/registrationConfig";
 import { MEMBER_LIMITS, getEntryFeeCents, formatAud } from "@/app/2026/_data/teamConfig";
 
 const SPECS = [
@@ -14,7 +20,9 @@ const SPECS = [
   },
 ];
 
-export default function Hero() {
+export default async function Hero() {
+  const stages = getCountdownStages(await getAppConfig());
+
   return (
     <section className="relative overflow-hidden">
       <div className="mx-auto grid max-w-6xl items-center gap-10 px-4 py-14 sm:px-6 md:py-20 lg:grid-cols-[1.15fr_1fr] lg:gap-14">
@@ -36,7 +44,7 @@ export default function Hero() {
 
           {/* Spec block, drafted like the title block on an engineering drawing.
               Solid-ish surface so the ruled grid does not run through the figures. */}
-          <dl className="drafting-frame bg-blueprint-900/85 mb-9 inline-block rounded-lg px-5 py-4 backdrop-blur-sm">
+          <dl className="drafting-frame bg-blueprint-900/85 mb-8 inline-block rounded-lg px-5 py-4 backdrop-blur-sm">
             {SPECS.map((spec) => (
               <div
                 key={spec.label}
@@ -51,6 +59,13 @@ export default function Hero() {
               </div>
             ))}
           </dl>
+
+          <div className="mb-9 max-w-xl">
+            <CountdownStages
+              stages={stages}
+              initialPhase={resolveCountdownPhase(stages)}
+            />
+          </div>
 
           <div className="flex flex-wrap items-center gap-4">
             <Link href={Path[2026].SignUp} className="button">

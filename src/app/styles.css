@@ -384,6 +384,176 @@
     @apply font-blueprint text-xs uppercase;
     color: var(--color-ink-dim);
   }
+
+  /*
+   * Split-flap countdown, as on a railway departure board: the top half of a
+   * digit folds down to reveal the number behind it.
+   *
+   * Four units of two digits is eight flaps, which will not fit on one line on
+   * a phone, so the board is a 2x2 grid of units by default and only becomes a
+   * single row, with colon separators, once there is room for one.
+   */
+  .flap-board {
+    display: grid;
+    grid-template-columns: repeat(2, max-content);
+    justify-content: start;
+    gap: 0.7rem 0.85rem;
+  }
+
+  .flap-colon {
+    display: none;
+  }
+
+  .flap-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .flap-digits {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  @media (min-width: 40rem) {
+    .flap-board {
+      display: flex;
+      flex-wrap: nowrap;
+      align-items: flex-start;
+      gap: 0.3rem;
+    }
+
+    .flap-colon {
+      display: block;
+      align-self: flex-start;
+      padding-top: clamp(0.8rem, 2.2vw, 1.35rem);
+      font-family: var(--font-display);
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 700;
+      line-height: 1;
+      color: var(--color-ink-dim);
+      opacity: 0.45;
+    }
+  }
+
+  /*
+   * One flap. The width tracks the viewport so eight of them shrink to fit a
+   * 320px screen rather than pushing the page sideways.
+   */
+  .flap {
+    --flap-h: clamp(3rem, 15vw, 4.3rem);
+    --flap-w: clamp(2rem, 10.5vw, 3rem);
+    position: relative;
+    display: block;
+    width: var(--flap-w);
+    height: var(--flap-h);
+    /* Shallow enough that the fold reads as a fold, not a hinge seen edge-on. */
+    perspective: 340px;
+    border-radius: var(--radius-sm);
+    /* Shows through the 2px seam between the halves, drawing the hinge. */
+    background-color: #02182f;
+    font-family: var(--font-display);
+    font-size: calc(var(--flap-h) * 0.76);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+  }
+
+  @media (min-width: 40rem) {
+    .flap {
+      --flap-h: clamp(2.9rem, 6.4vw, 4.4rem);
+      --flap-w: clamp(1.95rem, 4.3vw, 3.05rem);
+    }
+  }
+
+  .flap-half {
+    position: absolute;
+    inset-inline: 0;
+    height: calc(50% - 1px);
+    overflow: hidden;
+    background-image: linear-gradient(
+      180deg,
+      #0b3f81,
+      var(--color-blueprint-900)
+    );
+    color: var(--color-ink);
+    backface-visibility: hidden;
+  }
+
+  .flap-top {
+    top: 0;
+    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.14);
+  }
+
+  .flap-bottom {
+    bottom: 0;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    background-image: linear-gradient(
+      180deg,
+      #062a60,
+      var(--color-blueprint-950)
+    );
+  }
+
+  /*
+   * Each half holds a full-height glyph and clips it, so the two halves show
+   * the top and bottom slices of the same number rather than two half-glyphs
+   * that have to be kept in step.
+   */
+  .flap-half > span {
+    position: absolute;
+    left: 0;
+    display: block;
+    width: 100%;
+    height: var(--flap-h);
+    line-height: var(--flap-h);
+    text-align: center;
+  }
+
+  .flap-top > span {
+    top: 0;
+  }
+
+  .flap-bottom > span {
+    top: calc(var(--flap-h) * -0.5 + 1px);
+  }
+
+  /* The two folding leaves, in the DOM only for the length of one flip. */
+  .flap-fold {
+    z-index: 2;
+  }
+
+  .flap-fold.flap-top {
+    transform-origin: 50% 100%;
+    animation: flap-fold-down 130ms ease-in forwards;
+  }
+
+  .flap-fold.flap-bottom {
+    /* Starts folded up out of sight, so it arrives as the top leaf clears. */
+    transform: rotateX(90deg);
+    transform-origin: 50% 0;
+    animation: flap-fold-up 150ms 130ms ease-out forwards;
+  }
+}
+
+@keyframes flap-fold-down {
+  from {
+    transform: rotateX(0deg);
+  }
+  to {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flap-fold-up {
+  from {
+    transform: rotateX(90deg);
+  }
+  to {
+    transform: rotateX(0deg);
+  }
 }
 
 @keyframes caret-blink {
