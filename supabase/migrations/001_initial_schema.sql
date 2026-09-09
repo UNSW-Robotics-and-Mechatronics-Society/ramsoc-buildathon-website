@@ -156,17 +156,34 @@ create table app_config (
   registration_opens  timestamptz,
   registration_closes timestamptz,
   payment_deadline    timestamptz,
+  competition_starts  timestamptz,
+  project_deadline    timestamptz,
   updated_at          timestamptz not null default now()
 );
 
--- Buildathon 2026 runs Week 1-6 of term. Registration closes end of Week 1;
--- payment is due before the first build session in Week 4.
-insert into app_config (competition_year, registration_opens, registration_closes, payment_deadline)
+-- Buildathon 2026 runs Week 1-6 of term. Registration closes the night before
+-- the Week 1 kick-off, so the roster is settled before anyone walks in, and
+-- payment closes with it. Projects are due the morning of the Week 6 closing
+-- presentations.
+--
+-- The last three drive the hero countdown, which runs them as a chain, so they
+-- must stay in this order: registration closes, the competition begins, then
+-- projects are due.
+insert into app_config (
+  competition_year,
+  registration_opens,
+  registration_closes,
+  payment_deadline,
+  competition_starts,
+  project_deadline
+)
 values (
   2026,
   '2026-08-24T00:00:00+10:00',
-  '2026-09-20T23:59:59+10:00',
-  '2026-10-05T23:59:59+11:00'
+  '2026-09-14T23:59:59+10:00',
+  '2026-09-15T23:59:59+10:00',
+  '2026-09-15T18:00:00+10:00',
+  '2026-10-23T10:00:00+11:00'
 );
 
 -- ---------------------------------------------------------------- timeline --

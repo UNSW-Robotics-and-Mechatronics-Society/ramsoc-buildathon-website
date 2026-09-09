@@ -16,11 +16,16 @@ const DATE_FORMAT = new Intl.DateTimeFormat("en-AU", {
 export default async function RegisterCta() {
   const status = await getLiveRegistrationStatus();
 
-  const headline = status.isOpen
-    ? "Registrations are open"
-    : status.isUpcoming
-      ? "Registrations open soon"
-      : "Registrations have closed";
+  // The grace period gets its own headline: past the published close the
+  // countdown in the hero reads as struck through, so "registrations are open"
+  // next to it would look like one of the two is wrong.
+  const headline = status.inGracePeriod
+    ? "Last chance to register"
+    : status.isOpen
+      ? "Registrations are open"
+      : status.isUpcoming
+        ? "Registrations open soon"
+        : "Registrations have closed";
 
   return (
     <section className="py-8 md:py-12">

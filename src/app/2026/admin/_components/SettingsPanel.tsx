@@ -31,6 +31,8 @@ type Fields = {
   registration_opens: string;
   registration_closes: string;
   payment_deadline: string;
+  competition_starts: string;
+  project_deadline: string;
 };
 
 export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
@@ -43,6 +45,8 @@ export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
     registration_opens: "",
     registration_closes: "",
     payment_deadline: "",
+    competition_starts: "",
+    project_deadline: "",
   });
 
   useEffect(() => {
@@ -50,6 +54,8 @@ export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
       registration_opens: toLocalDatetimeValue(config.registration_opens),
       registration_closes: toLocalDatetimeValue(config.registration_closes),
       payment_deadline: toLocalDatetimeValue(config.payment_deadline),
+      competition_starts: toLocalDatetimeValue(config.competition_starts),
+      project_deadline: toLocalDatetimeValue(config.project_deadline),
     });
     setReady(true);
   }, [config]);
@@ -68,9 +74,11 @@ export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
         registration_opens: new Date(fields.registration_opens).toISOString(),
         registration_closes: new Date(fields.registration_closes).toISOString(),
         payment_deadline: new Date(fields.payment_deadline).toISOString(),
+        competition_starts: new Date(fields.competition_starts).toISOString(),
+        project_deadline: new Date(fields.project_deadline).toISOString(),
       });
       if (result.success) {
-        setSuccess("Registration dates updated.");
+        setSuccess("Key dates updated.");
         router.refresh();
       } else {
         setError(result.error ?? "Failed to update dates");
@@ -84,8 +92,8 @@ export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
       {success && <Alert tone="success">{success}</Alert>}
 
       <PanelSection
-        title="Registration window"
-        description="Times are entered in your local timezone and stored as UTC. These drive the countdown on the public site and whether participants can create or join teams."
+        title="Key dates"
+        description="Times are entered in your local timezone and stored as UTC. These drive the countdown on the public site and whether participants can create or join teams. The last three must run in order: registration closes, the competition begins, then projects are due."
       >
         <div className="flex flex-col gap-4">
           <DateField
@@ -105,6 +113,18 @@ export default function SettingsPanel({ config }: { config: AdminAppConfig }) {
             hint="Last moment a captain can pay the team entry fee."
             value={fields.payment_deadline}
             onChange={set("payment_deadline")}
+          />
+          <DateField
+            label="Competition begins"
+            hint="Week 1 kick-off. The hero starts counting down to this once registration closes."
+            value={fields.competition_starts}
+            onChange={set("competition_starts")}
+          />
+          <DateField
+            label="Project deadline"
+            hint="Projects due. The hero counts down to this once the competition has begun."
+            value={fields.project_deadline}
+            onChange={set("project_deadline")}
           />
 
           <ActionButton
