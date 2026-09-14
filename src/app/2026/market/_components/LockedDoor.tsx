@@ -20,7 +20,7 @@ function signFor(access: Shut): {
     case "signed-out":
       return {
         title: "No name, no entry.",
-        body: "The doorman needs to know who you are. Paid teams only past this point.",
+        body: "The doorman needs to know who you are. Sign in to get past the door.",
         cta: { label: "Sign in", href: backHere },
         secondary: { label: "Register", href: Path[2026].SignUp },
       };
@@ -29,22 +29,6 @@ function signFor(access: Shut): {
         title: "You're not on the list.",
         body: "Finish registering first. Then come back and knock.",
         cta: { label: "Finish registering", href: Path[2026].Onboarding },
-      };
-    case "no-team":
-      return {
-        title: "Lone operators not admitted.",
-        body: "You need a team, and that team needs to have paid. Create one or join one from your dashboard.",
-        cta: { label: "Go to my dashboard", href: Path[2026].Dashboard },
-      };
-    case "unpaid":
-      return {
-        title: "Your team hasn't paid.",
-        body: access.isCaptain
-          ? "The doorman checks. Pay the entry fee and the door opens for your whole team."
-          : "The doorman checks. Ask your captain to pay the entry fee and the door opens for your whole team.",
-        cta: access.isCaptain
-          ? { label: "Pay the entry fee", href: Path[2026].Payment }
-          : { label: "Go to my dashboard", href: Path[2026].Dashboard },
       };
     case "closed":
       return {
@@ -107,7 +91,7 @@ export default function LockedDoor({ access }: { access: Shut }) {
         </div>
 
         <p className="font-blueprint text-ink-dim/70 mt-10 max-w-xs text-[0.65rem] uppercase">
-          An anonymous room for members of paid teams to trade bonus
+          An anonymous room for registered participants to trade bonus
           component-shop tickets. Organisers can see everything.
         </p>
       </div>

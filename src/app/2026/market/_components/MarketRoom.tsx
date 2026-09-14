@@ -43,8 +43,6 @@ const TIME = new Intl.DateTimeFormat("en-AU", {
 const SHUT_COPY: Record<Exclude<MarketAccess["state"], "ok">, string> = {
   "signed-out": "You were signed out.",
   "no-profile": "Your registration went missing.",
-  "no-team": "You left your team.",
-  unpaid: "Your team is no longer marked as paid.",
   closed: "Management closed the market.",
   muted: "You've been asked to leave.",
 };

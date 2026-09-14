@@ -86,7 +86,7 @@ function TicketsSection({
         <Link href={Path[2026].Market} className="text-link">
           Black Market
         </Link>
-        , if your team has paid.
+        .
       </p>
     </Card>
   );
