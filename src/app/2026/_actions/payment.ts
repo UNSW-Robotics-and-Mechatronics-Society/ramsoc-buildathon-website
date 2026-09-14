@@ -4,6 +4,8 @@ import { auth } from "@clerk/nextjs/server";
 import { getSupabaseSecretClient } from "@/app/_utils/supabase";
 import { SquareClient, SquareEnvironment } from "square";
 import {
+  COMPETITION_YEAR,
+  MAX_PAID_TEAMS,
   MEMBER_LIMITS,
   getEntryFeeCents,
   grossUpForSquareFee,
@@ -37,6 +39,18 @@ export type PaymentQuote = {
   feeCents: number;
 };
 
+/** MCIC only fits MAX_PAID_TEAMS teams, so entry closes once that many have paid. */
+export async function isRegistrationFull(): Promise<boolean> {
+  const supabase = getSupabaseSecretClient();
+  const { count } = await supabase
+    .from("teams")
+    .select("id", { count: "exact", head: true })
+    .eq("competition_year", COMPETITION_YEAR)
+    .eq("paid", true);
+
+  return (count ?? 0) >= MAX_PAID_TEAMS;
+}
+
 /**
  * What the captain will actually be charged. The form and the server action
  * both derive this from the same helper so the displayed figure can never
@@ -51,7 +65,7 @@ export async function getPaymentQuote(): Promise<PaymentQuote> {
 export async function processPayment(
   sourceId: string,
   billing?: { cardholderName?: string; postalCode?: string },
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; full?: boolean }> {
   const { userId } = await auth();
   if (!userId) return { success: false, error: "Not authenticated" };
 
@@ -94,6 +108,14 @@ export async function processPayment(
     return {
       success: false,
       error: `You need at least ${MEMBER_LIMITS.min} members before paying.`,
+    };
+  }
+
+  if (await isRegistrationFull()) {
+    return {
+      success: false,
+      error: `Registration is full. All ${MAX_PAID_TEAMS} team spots have been taken.`,
+      full: true,
     };
   }
 

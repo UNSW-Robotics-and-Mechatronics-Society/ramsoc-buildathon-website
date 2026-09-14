@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/app/2026/_components/ui/Button";
 import { processPayment, type PaymentQuote } from "@/app/2026/_actions/payment";
-import { formatAud } from "@/app/2026/_data/teamConfig";
+import { MAX_PAID_TEAMS, formatAud } from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 
 /* ------------------------------------------------------------------ */
@@ -203,6 +203,8 @@ export default function PaymentForm({
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState<string>();
   const [success, setSuccess] = useState(false);
+  /** Someone else's payment filled the last spot while this captain was mid-checkout. */
+  const [registrationFull, setRegistrationFull] = useState(false);
   const [cardholderName, setCardholderName] = useState("");
   const [postalCode, setPostalCode] = useState("");
   const [applePayAvailable, setApplePayAvailable] = useState(false);
@@ -245,6 +247,8 @@ export default function PaymentForm({
           setSuccess(true);
           // Team is now paid, make sure the dashboard reflects that.
           router.refresh();
+        } else if (response.full) {
+          setRegistrationFull(true);
         } else {
           setError(response.error ?? "Payment failed. Please try again.");
         }
@@ -388,7 +392,7 @@ export default function PaymentForm({
 
   /** Claim the in-flight lock. Returns false if a payment is already running. */
   function beginPayment(): boolean {
-    if (inFlightRef.current || !cardReady) return false;
+    if (inFlightRef.current || !cardReady || registrationFull) return false;
     inFlightRef.current = true;
     setProcessing(true);
     setError(undefined);
@@ -479,6 +483,49 @@ export default function PaymentForm({
 
   return (
     <div className="flex flex-col gap-6">
+      {registrationFull && (
+        <div
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="registration-full-heading"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-blueprint-950/80 p-4 backdrop-blur-sm"
+        >
+          <div
+            className="drafting-frame lego-studs brick bg-blueprint-900 w-full max-w-sm rounded-xl p-6 text-center shadow-2xl [--stud-color:var(--color-lego-red)]"
+          >
+            <div
+              className="bg-lego-red/20 text-lego-red mx-auto flex h-16 w-16 items-center justify-center rounded-full"
+              aria-hidden
+            >
+              <svg
+                className="h-8 w-8"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2.5}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </div>
+            <p className="spec-label mt-4">Buildathon 2026</p>
+            <h2 id="registration-full-heading" className="mt-1 text-2xl">
+              Registration is full
+            </h2>
+            <p className="font-main text-ink-dim mt-2 text-sm">
+              All {MAX_PAID_TEAMS} team spots filled up while you were
+              checking out. Your card has not been charged.
+            </p>
+            <Link href={Path[2026].Dashboard} className="button mt-6 w-full">
+              Back to dashboard
+            </Link>
+          </div>
+        </div>
+      )}
+
       <Link
         href={Path[2026].Dashboard}
         className="font-blueprint text-ink-dim hover:text-ink -ml-1 inline-flex min-h-[44px] items-center gap-1.5 px-1 text-xs uppercase transition-colors"
@@ -559,7 +606,7 @@ export default function PaymentForm({
             type="button"
             aria-label={`Pay ${totalLabel} with Apple Pay`}
             onClick={() => handleWalletPay(applePayRef.current, "Apple Pay")}
-            disabled={processing || !cardReady}
+            disabled={processing || !cardReady || registrationFull}
             style={{
               WebkitAppearance: "-apple-pay-button" as never,
               appearance: "-apple-pay-button" as never,
@@ -669,7 +716,7 @@ export default function PaymentForm({
       <Button
         size="full"
         onClick={handleCardPay}
-        disabled={!cardReady || processing}
+        disabled={!cardReady || processing || registrationFull}
         loading={processing}
         className="font-display brick text-lg font-bold tracking-wide uppercase"
       >
