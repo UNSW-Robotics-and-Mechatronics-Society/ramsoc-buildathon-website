@@ -9,6 +9,9 @@ export const MEMBER_LIMITS = { min: 2, max: 6 } as const;
 
 export const COMPETITION_YEAR = 2026;
 
+/** MCIC can only host so many teams. Once this many have paid, entry closes. */
+export const MAX_PAID_TEAMS = 60;
+
 /** Entry fee in cents. Falls back to $50 if the env var is missing/invalid. */
 export function getEntryFeeCents(): number {
   const parsed = Number(process.env.NEXT_PUBLIC_TEAM_PRICE);
