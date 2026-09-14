@@ -1,11 +1,96 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useClerk } from "@clerk/nextjs";
 import type { Profile } from "@/app/_types/registration";
+import type { Ticket, TicketClass } from "@/app/_types/market";
 import Card from "@/app/2026/_components/ui/Card";
 import { Button } from "@/app/2026/_components/ui/Button";
+import TicketCard from "@/app/2026/_components/tickets/TicketCard";
+import { TICKET_CLASSES } from "@/app/2026/_data/tickets";
+import Path from "@/app/path";
 import EditProfileForm from "./EditProfileForm";
+
+const CLASS_ORDER: TicketClass[] = ["A", "B", "C"];
+
+/** Count per class as a row of brick chips, then every ticket in full. */
+function TicketsSection({
+  tickets,
+  holderName,
+}: {
+  tickets: Ticket[];
+  holderName: string;
+}) {
+  const counts = CLASS_ORDER.map((cls) => ({
+    cls,
+    n: tickets.filter((t) => t.class === cls).length,
+  }));
+
+  return (
+    <Card className="bg-blueprint-900/50 p-4 sm:p-5">
+      <div className="mb-3 flex flex-wrap items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="spec-label">Component shop</p>
+          <h3 className="mt-0.5 text-lg">Bonus tickets</h3>
+        </div>
+        <span className="font-blueprint text-ink-dim text-xs">
+          {tickets.length} held
+        </span>
+      </div>
+
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {counts.map(({ cls, n }) => {
+          const spec = TICKET_CLASSES[cls];
+          return (
+            <div
+              key={cls}
+              style={{
+                backgroundColor: n > 0 ? spec.brick : undefined,
+                color: n > 0 ? spec.ink : undefined,
+              }}
+              className={`lego-studs rounded-md px-3 py-2 text-center ${
+                n > 0
+                  ? "brick"
+                  : "text-ink-dim border border-dashed border-white/25 bg-white/5 [--stud-color:rgba(255,255,255,0.14)]"
+              }`}
+            >
+              <p className="font-display text-2xl leading-none font-bold">
+                {n}
+              </p>
+              <p className="font-blueprint mt-1 text-[0.6rem] uppercase opacity-85">
+                {spec.label}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+
+      {tickets.length === 0 ? (
+        <p className="font-main text-ink-dim text-sm">
+          None yet. Tickets from workshops are handed out in person; a few
+          bonus ones are hidden around this site.
+        </p>
+      ) : (
+        <ul className="flex flex-col gap-4 pt-1">
+          {tickets.map((t) => (
+            <li key={t.id}>
+              <TicketCard ticket={t} holderName={holderName} size="sm" />
+            </li>
+          ))}
+        </ul>
+      )}
+
+      <p className="font-main text-ink-dim mt-4 text-xs">
+        Tickets can change hands in the{" "}
+        <Link href={Path[2026].Market} className="text-link">
+          Black Market
+        </Link>
+        , if your team has paid.
+      </p>
+    </Card>
+  );
+}
 
 const GENDER_LABELS: Record<string, string> = {
   male: "Male",
@@ -38,9 +123,11 @@ function SpecRow({ label, value }: { label: string; value: string }) {
 
 export default function ProfileTab({
   profile,
+  tickets = [],
   onLogout,
 }: {
   profile: Profile;
+  tickets?: Ticket[];
   onLogout?: () => void;
 }) {
   const clerk = useClerk();
@@ -134,6 +221,8 @@ export default function ProfileTab({
           <SpecRow label="Dietary" value={profile.dietary_requirements} />
         </dl>
       </Card>
+
+      <TicketsSection tickets={tickets} holderName={profile.full_name} />
 
       <Card className="bg-blueprint-900/50 p-4 sm:p-5">
         {showLogoutConfirm ? (

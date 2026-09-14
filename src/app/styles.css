@@ -234,6 +234,36 @@
   outline-offset: 0.35rem;
 }
 
+/*
+ * The Black Market. Same blueprint world, lights off: a near-black navy
+ * ground, a brick wall drawn from offset rows, and one amber lamp.
+ */
+@utility market-wall {
+  background-color: #050b18;
+  background-image:
+    radial-gradient(
+      ellipse 60% 45% at 50% -10%,
+      rgb(217 164 65 / 0.22),
+      transparent 70%
+    ),
+    linear-gradient(rgb(255 255 255 / 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.045) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 28px,
+    56px 28px;
+}
+
+@keyframes market-flicker {
+  0%, 18%, 22%, 63%, 65%, 100% { opacity: 1; }
+  20%, 64% { opacity: 0.55; }
+  21% { opacity: 0.85; }
+}
+
+@utility market-flicker {
+  animation: market-flicker 7s infinite;
+}
+
 /* ----------------------------------------------------------------- base -- */
 
 @layer base {

@@ -8,11 +8,12 @@ export async function getAllProfiles(): Promise<ProfileWithTeam[]> {
   await assertAdmin();
   const supabase = getSupabaseSecretClient();
 
-  const { data: profiles } = await supabase
+  const { data: profiles, error } = await supabase
     .from("profiles")
     .select("*, team_members(team_id, role, team:teams(name))")
     .order("created_at", { ascending: false });
 
+  if (error) throw new Error(`Could not load participants: ${error.message}`);
   if (!profiles) return [];
 
   return profiles.map((p) => {
