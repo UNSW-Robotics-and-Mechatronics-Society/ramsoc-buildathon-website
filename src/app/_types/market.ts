@@ -56,7 +56,10 @@ export type AdminMarketMessage = {
   alias: string | null;
   full_name: string | null;
   email: string | null;
-  profile_id: string | null;
+  /** Moderation key: identifies the dealer regardless of registration. */
+  clerk_user_id: string | null;
+  /** Whether this dealer has a Buildathon profile (and so can hold tickets). */
+  registered: boolean;
   muted: boolean;
 };
 

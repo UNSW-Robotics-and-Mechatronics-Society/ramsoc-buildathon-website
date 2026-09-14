@@ -42,7 +42,6 @@ const TIME = new Intl.DateTimeFormat("en-AU", {
 
 const SHUT_COPY: Record<Exclude<MarketAccess["state"], "ok">, string> = {
   "signed-out": "You were signed out.",
-  "no-profile": "Your registration went missing.",
   closed: "Management closed the market.",
   muted: "You've been asked to leave.",
 };
@@ -99,11 +98,14 @@ function Message({ m }: { m: MarketMessage }) {
 function Wallet({
   tickets,
   dealers,
+  registered,
   onHandOver,
   busy,
 }: {
   tickets: Ticket[];
   dealers: MarketDealer[];
+  /** False for a dealer signed in but never onboarded: nothing to hold yet. */
+  registered: boolean;
   onHandOver: (ticketId: string, alias: string) => Promise<string | null>;
   busy: boolean;
 }) {
@@ -135,8 +137,18 @@ function Wallet({
 
       {tickets.length === 0 ? (
         <p className="font-main text-ink-dim text-sm">
-          Nothing to trade. Tickets from the workshops are paper; the bonus ones
-          are hidden around this site.
+          {registered ? (
+            "Nothing to trade. Tickets from the workshops are paper; the bonus ones are hidden around this site."
+          ) : (
+            <>
+              Nothing to trade yet. Ticket holding needs a Buildathon
+              registration, so a workshop can check it against a real person.{" "}
+              <Link href={Path[2026].Onboarding} className="text-link">
+                Finish registering
+              </Link>
+              .
+            </>
+          )}
         </p>
       ) : (
         <ul className="flex flex-col gap-4 pt-1">
@@ -529,6 +541,7 @@ export default function MarketRoom({ initial }: { initial: Room }) {
               <Wallet
                 tickets={tickets}
                 dealers={online}
+                registered={initial.registered}
                 onHandOver={handOver}
                 busy={isPending}
               />

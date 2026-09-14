@@ -27,14 +27,14 @@ export async function getAdminMarket(): Promise<{
     supabase
       .from("market_messages")
       .select(
-        "id, seq, kind, body, created_at, deleted_at, profile_id, profile:profiles(full_name, email, market_alias, market_muted)",
+        "id, seq, kind, body, created_at, deleted_at, author_id, dealer:market_identities(clerk_user_id, alias, muted, profile:profiles(full_name, email))",
       )
       .order("seq", { ascending: false })
       .limit(ADMIN_HISTORY),
     supabase
       .from("tickets")
       .select(
-        "id, serial, class, source, minted_at, transfer_count, holder:profiles!tickets_holder_id_fkey(full_name, email, market_alias), minter:profiles!tickets_minted_by_fkey(full_name)",
+        "id, serial, class, source, minted_at, transfer_count, holder:profiles!tickets_holder_id_fkey(full_name, email, market_identities(alias)), minter:profiles!tickets_minted_by_fkey(full_name)",
       )
       .eq("competition_year", COMPETITION_YEAR)
       .order("minted_at", { ascending: false }),
@@ -53,7 +53,8 @@ export async function getAdminMarket(): Promise<{
   return {
     open: (config.data?.market_open as boolean | undefined) ?? true,
     messages: (messages.data ?? []).map((m) => {
-      const p = one(m.profile);
+      const dealer = one(m.dealer);
+      const profile = one(dealer?.profile);
       return {
         id: m.id,
         seq: Number(m.seq),
@@ -61,16 +62,18 @@ export async function getAdminMarket(): Promise<{
         body: m.body,
         created_at: m.created_at,
         deleted_at: m.deleted_at ?? null,
-        profile_id: m.profile_id ?? null,
-        alias: p?.market_alias ?? null,
-        full_name: p?.full_name ?? null,
-        email: p?.email ?? null,
-        muted: Boolean(p?.market_muted),
+        alias: dealer?.alias ?? null,
+        full_name: profile?.full_name ?? null,
+        email: profile?.email ?? null,
+        clerk_user_id: dealer?.clerk_user_id ?? m.author_id ?? null,
+        registered: Boolean(profile),
+        muted: Boolean(dealer?.muted),
       } as AdminMarketMessage;
     }),
     tickets: (tickets.data ?? []).map((t) => {
       const holder = one(t.holder);
       const minter = one(t.minter);
+      const holderDealer = one(holder?.market_identities);
       return {
         id: t.id,
         serial: t.serial,
@@ -80,7 +83,7 @@ export async function getAdminMarket(): Promise<{
         transfer_count: t.transfer_count,
         holder_name: holder?.full_name ?? null,
         holder_email: holder?.email ?? null,
-        holder_alias: holder?.market_alias ?? null,
+        holder_alias: holderDealer?.alias ?? null,
         minted_by_name: minter?.full_name ?? null,
       } as AdminTicketRow;
     }),
@@ -110,7 +113,7 @@ export async function adminSetMarketOpen(open: boolean): Promise<Result> {
   if (error) return { success: false, error: error.message };
 
   await supabase.from("market_messages").insert({
-    profile_id: null,
+    author_id: null,
     kind: "system",
     body: open
       ? "The shutters are up. The market is open."
@@ -119,17 +122,17 @@ export async function adminSetMarketOpen(open: boolean): Promise<Result> {
   return { success: true };
 }
 
-/** Muted dealers can still read; they cannot post or trade. */
+/** Muted dealers can still read; they cannot post or trade. Keyed by Clerk id. */
 export async function adminSetMarketMuted(
-  profileId: string,
+  clerkUserId: string,
   muted: boolean,
 ): Promise<Result> {
   await assertAdmin();
   const supabase = getSupabaseSecretClient();
   const { error } = await supabase
-    .from("profiles")
-    .update({ market_muted: muted })
-    .eq("id", profileId);
+    .from("market_identities")
+    .update({ muted })
+    .eq("clerk_user_id", clerkUserId);
   if (error) return { success: false, error: error.message };
   return { success: true };
 }

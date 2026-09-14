@@ -113,7 +113,7 @@ export default function MarketPanel({
 
   const byClass = (cls: TicketClass) =>
     tickets.filter((t) => t.class === cls).length;
-  const dealers = new Set(messages.map((m) => m.profile_id).filter(Boolean));
+  const dealers = new Set(messages.map((m) => m.clerk_user_id).filter(Boolean));
 
   return (
     <div className="flex flex-col gap-6">
@@ -211,7 +211,7 @@ export default function MarketPanel({
                     )}
                   </td>
                   <td className="px-3 py-2.5">
-                    {m.profile_id ? (
+                    {m.registered ? (
                       <>
                         <p className="font-main text-ink text-sm">
                           {m.full_name ?? "-"}
@@ -220,6 +220,8 @@ export default function MarketPanel({
                           {m.email}
                         </p>
                       </>
+                    ) : m.clerk_user_id ? (
+                      <StatusPill tone="neutral">Not registered</StatusPill>
                     ) : (
                       <span className="text-ink-dim text-sm">-</span>
                     )}
@@ -245,13 +247,13 @@ export default function MarketPanel({
                             }
                           />
                         )}
-                        {m.profile_id && (
+                        {m.clerk_user_id && (
                           <ActionButton
                             tone={m.muted ? "primary" : "neutral"}
                             disabled={isPending}
                             onClick={() =>
                               handleAction(() =>
-                                adminSetMarketMuted(m.profile_id!, !m.muted),
+                                adminSetMarketMuted(m.clerk_user_id!, !m.muted),
                               )
                             }
                           >

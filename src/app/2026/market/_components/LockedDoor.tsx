@@ -22,13 +22,7 @@ function signFor(access: Shut): {
         title: "No name, no entry.",
         body: "The doorman needs to know who you are. Sign in to get past the door.",
         cta: { label: "Sign in", href: backHere },
-        secondary: { label: "Register", href: Path[2026].SignUp },
-      };
-    case "no-profile":
-      return {
-        title: "You're not on the list.",
-        body: "Finish registering first. Then come back and knock.",
-        cta: { label: "Finish registering", href: Path[2026].Onboarding },
+        secondary: { label: "Create an account", href: Path[2026].SignUp },
       };
     case "closed":
       return {
@@ -91,8 +85,9 @@ export default function LockedDoor({ access }: { access: Shut }) {
         </div>
 
         <p className="font-blueprint text-ink-dim/70 mt-10 max-w-xs text-[0.65rem] uppercase">
-          An anonymous room for registered participants to trade bonus
-          component-shop tickets. Organisers can see everything.
+          An anonymous room, open to anyone signed in. Registered entrants can
+          also trade bonus component-shop tickets. Organisers can see
+          everything.
         </p>
       </div>
     </section>
