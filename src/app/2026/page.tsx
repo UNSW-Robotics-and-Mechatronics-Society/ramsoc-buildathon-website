@@ -8,6 +8,14 @@ import Support from "@/app/2026/_components/Support";
 import RegisterCta from "@/app/2026/_components/RegisterCta";
 import FindTeamCallout from "@/app/2026/_components/FindTeamCallout";
 
+/**
+ * The hero reads live key dates and the remaining team slots, both of which
+ * would otherwise be baked in at build time and never move again. Sixty
+ * seconds is short enough that a slot count stays honest on a busy night and
+ * long enough that the page is still served from cache under load.
+ */
+export const revalidate = 60;
+
 export default function Home() {
   return (
     <>

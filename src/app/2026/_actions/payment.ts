@@ -4,7 +4,9 @@ import { auth } from "@clerk/nextjs/server";
 import { getSupabaseSecretClient } from "@/app/_utils/supabase";
 import { SquareClient, SquareEnvironment } from "square";
 import {
+  COMPETITION_YEAR,
   MEMBER_LIMITS,
+  PAID_TEAM_CAP,
   getEntryFeeCents,
   grossUpForSquareFee,
 } from "@/app/2026/_data/teamConfig";
@@ -97,6 +99,39 @@ export async function processPayment(
     };
   }
 
+  // ---- capacity gate -------------------------------------------------
+  // Kits and floor space cap the event at PAID_TEAM_CAP active teams, so the
+  // fee stops being collected once that many have paid. Counted here, right
+  // before the charge, rather than trusted from the page the captain loaded:
+  // that page may have been open for an hour.
+  const { count: paidTeams, error: capacityError } = await supabase
+    .from("teams")
+    .select("id", { count: "exact", head: true })
+    .eq("competition_year", COMPETITION_YEAR)
+    .eq("paid", true);
+
+  if (capacityError || paidTeams === null) {
+    // Fail closed. Taking money without knowing whether there is a place for
+    // the team is worse than asking the captain to try again in a minute.
+    await logError("payment", "Could not read remaining capacity", {
+      teamId: team.id,
+      userId,
+      error: capacityError?.message,
+    });
+    return {
+      success: false,
+      error:
+        "We could not check how many places are left. Nothing has been charged, please try again in a minute.",
+    };
+  }
+
+  if (paidTeams >= PAID_TEAM_CAP) {
+    return {
+      success: false,
+      error: `Buildathon 2026 is full: all ${PAID_TEAM_CAP} team slots have been taken. Nothing has been charged. Contact an organiser to go on the waitlist.`,
+    };
+  }
+
   const baseCents = getEntryFeeCents();
   const amountCents = grossUpForSquareFee(baseCents);
 
@@ -152,6 +187,26 @@ export async function processPayment(
         error:
           "Your payment went through but we could not activate your team. Please contact an organiser. Do not pay again.",
       };
+    }
+
+    // The count above runs seconds before the charge, so two captains paying
+    // for the last slot at the same instant can both get through it. The money
+    // has already moved by the time we could tell, so the team stays active
+    // and an organiser is told to sort out the overshoot, rather than the
+    // payment being refused after the fact.
+    const { count: paidAfter } = await supabase
+      .from("teams")
+      .select("id", { count: "exact", head: true })
+      .eq("competition_year", COMPETITION_YEAR)
+      .eq("paid", true);
+
+    if (paidAfter !== null && paidAfter > PAID_TEAM_CAP) {
+      await logError("payment", "Paid teams exceeded the cap", {
+        teamId: team.id,
+        squarePaymentId: response.payment.id,
+        paidTeams: paidAfter,
+        cap: PAID_TEAM_CAP,
+      });
     }
 
     const { error: insertError } = await supabase.from("payments").insert({

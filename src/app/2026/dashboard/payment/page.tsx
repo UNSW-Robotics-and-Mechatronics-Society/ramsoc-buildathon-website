@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 import { getProfile } from "@/app/2026/_actions/profile";
 import { getMyTeam } from "@/app/2026/_actions/team";
 import { getPaymentQuote } from "@/app/2026/_actions/payment";
+import { getTeamCapacity } from "@/app/2026/_actions/capacity";
 import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 import PaymentForm from "./_components/PaymentForm";
+import SoldOutNotice from "./_components/SoldOutNotice";
 
 export const metadata = { title: "Pay entry fee" };
 
@@ -25,15 +27,25 @@ export default async function PaymentPage() {
 
   // Single source of truth for the amount. processPayment() derives the charge
   // from the same helper, so what is shown here is exactly what is charged.
-  const quote = await getPaymentQuote();
+  const [quote, capacity] = await Promise.all([
+    getPaymentQuote(),
+    getTeamCapacity(),
+  ]);
 
   return (
     <main className="mx-auto w-full max-w-xl px-4 pt-8 pb-16 sm:px-6 sm:pt-12">
-      <PaymentForm
-        teamName={team.name}
-        memberCount={team.members.length}
-        quote={quote}
-      />
+      {/* Full: show why rather than a card form that would be refused by
+          processPayment() anyway, which re-counts before it charges. */}
+      {capacity?.soldOut ? (
+        <SoldOutNotice cap={capacity.cap} />
+      ) : (
+        <PaymentForm
+          teamName={team.name}
+          memberCount={team.members.length}
+          quote={quote}
+          capacity={capacity}
+        />
+      )}
     </main>
   );
 }

@@ -32,3 +32,42 @@ export function formatAud(cents: number): string {
     currency: "AUD",
   }).format(cents / 100);
 }
+
+/**
+ * Hard cap on how many teams can buy their way onto the floor. Kits, mentors
+ * and the MCIC makerspace only stretch this far, so the entry fee stops being
+ * collected once this many teams are active.
+ *
+ * The cap counts *paid* teams, not formed ones: an unpaid team holds nothing,
+ * and a slot is taken at the moment the captain's card clears.
+ */
+export const PAID_TEAM_CAP = 60;
+
+/**
+ * Only advertise the remaining count once it drops below this. Above it the
+ * number is noise ("47 slots left" says nothing); below it, it is the reason
+ * to register tonight rather than next week.
+ */
+export const LOW_SLOTS_THRESHOLD = 10;
+
+/** How many of the capped slots are gone, and how many are left. */
+export type TeamCapacity = {
+  cap: number;
+  paidTeams: number;
+  /** Never negative: an oversell reads as zero left, not minus one. */
+  remaining: number;
+  soldOut: boolean;
+  /** Few enough left to be worth telling people about. */
+  isLow: boolean;
+};
+
+export function describeCapacity(paidTeams: number): TeamCapacity {
+  const remaining = Math.max(PAID_TEAM_CAP - paidTeams, 0);
+  return {
+    cap: PAID_TEAM_CAP,
+    paidTeams,
+    remaining,
+    soldOut: remaining === 0,
+    isLow: remaining < LOW_SLOTS_THRESHOLD,
+  };
+}

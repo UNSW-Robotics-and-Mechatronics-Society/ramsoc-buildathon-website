@@ -3,6 +3,7 @@ import Link from "next/link";
 import { getProfile } from "@/app/2026/_actions/profile";
 import { getMyTeam, browseTeams } from "@/app/2026/_actions/team";
 import { getActiveTasks } from "@/app/2026/_actions/tasks";
+import { getTeamCapacity } from "@/app/2026/_actions/capacity";
 import Path from "@/app/path";
 import DashboardContent from "./_components/DashboardContent";
 
@@ -15,7 +16,11 @@ export default async function DashboardPage() {
     redirect(Path[2026].Onboarding);
   }
 
-  const [team, tasks] = await Promise.all([getMyTeam(), getActiveTasks()]);
+  const [team, tasks, capacity] = await Promise.all([
+    getMyTeam(),
+    getActiveTasks(),
+    getTeamCapacity(),
+  ]);
   const browsable = team ? [] : await browseTeams();
 
   return (
@@ -66,6 +71,7 @@ export default async function DashboardPage() {
         team={team}
         browsableTeams={browsable}
         adminTasks={tasks}
+        capacity={capacity}
       />
     </main>
   );
