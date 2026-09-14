@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useAuth } from "@clerk/nextjs";
 import { Menu, X } from "lucide-react";
 import Path from "@/app/path";
 import { cn } from "@/app/_utils/cn";
+import { useEgg } from "@/app/2026/_components/eggs/EggProvider";
+import { LOGO_EGG_TAPS, LOGO_EGG_WINDOW_MS } from "@/app/2026/_data/tickets";
 
 const LINKS = [
   { label: "About", href: Path[2026].About },
@@ -16,9 +18,32 @@ const LINKS = [
   { label: "Partners", href: Path[2026].Sponsors },
 ];
 
+/** Dim amber, like a lamp over a back door. Sits apart from the other links. */
+const MARKET_LINK =
+  "font-blueprint text-[#d9a441] hover:text-lego-yellow text-xs uppercase transition-colors";
+
 export default function Nav() {
   const [open, setOpen] = useState(false);
   const { isSignedIn, isLoaded } = useAuth();
+  const egg = useEgg();
+
+  // Timestamps of recent taps on the logo. Six inside the window opens the
+  // egg; the ref survives the navigations the first few taps cause because
+  // the nav lives in the layout.
+  const taps = useRef<number[]>([]);
+
+  function handleLogoClick(e: React.MouseEvent<HTMLAnchorElement>) {
+    const now = Date.now();
+    taps.current = [
+      ...taps.current.filter((t) => now - t < LOGO_EGG_WINDOW_MS),
+      now,
+    ];
+    if (taps.current.length >= LOGO_EGG_TAPS) {
+      e.preventDefault();
+      taps.current = [];
+      egg.open("logo6");
+    }
+  }
 
   // Until Clerk resolves we show the neutral "Register" label rather than
   // flashing the wrong call to action at a signed-in user.
@@ -33,7 +58,8 @@ export default function Nav() {
       >
         <Link
           href={Path[2026].Root}
-          className="flex items-center gap-3"
+          onClick={handleLogoClick}
+          className="flex items-center gap-3 select-none"
           aria-label="Buildathon 2026 home"
         >
           <Image
@@ -62,6 +88,11 @@ export default function Nav() {
               </a>
             </li>
           ))}
+          <li>
+            <Link href={Path[2026].Market} className={MARKET_LINK}>
+              Black Market
+            </Link>
+          </li>
         </ul>
 
         <div className="flex items-center gap-2">
@@ -100,6 +131,15 @@ export default function Nav() {
               </a>
             </li>
           ))}
+          <li>
+            <Link
+              href={Path[2026].Market}
+              onClick={() => setOpen(false)}
+              className={cn(MARKET_LINK, "block py-3")}
+            >
+              Black Market
+            </Link>
+          </li>
           <li className="py-3">
             <Link
               href={ctaHref}

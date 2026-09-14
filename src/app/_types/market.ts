@@ -1,0 +1,68 @@
+export type TicketClass = "A" | "B" | "C";
+
+export type Ticket = {
+  id: string;
+  serial: string;
+  class: TicketClass;
+  /** The easter egg that minted it. */
+  source: string;
+  minted_at: string;
+  transfer_count: number;
+};
+
+/** What other people in the market see of you. Never a real name. */
+export type MarketIdentity = {
+  alias: string;
+  avatarSeed: number;
+};
+
+export type MarketMessageKind = "chat" | "offer" | "system";
+
+export type MarketMessage = {
+  id: string;
+  seq: number;
+  kind: MarketMessageKind;
+  body: string;
+  created_at: string;
+  /** Null for system notices. */
+  author: MarketIdentity | null;
+  mine: boolean;
+};
+
+export type MarketDealer = MarketIdentity & {
+  /** Seen in the last couple of minutes. */
+  online: boolean;
+};
+
+/** One poll's worth of changes since the client's cursor. */
+export type MarketPoll = {
+  messages: MarketMessage[];
+  deletedIds: string[];
+  dealers: MarketDealer[];
+  open: boolean;
+  /** Server clock at the time of the poll, echoed back as `since`. */
+  now: string;
+};
+
+// ── admin views ──────────────────────────────────────────────────────────────
+
+export type AdminMarketMessage = {
+  id: string;
+  seq: number;
+  kind: MarketMessageKind;
+  body: string;
+  created_at: string;
+  deleted_at: string | null;
+  alias: string | null;
+  full_name: string | null;
+  email: string | null;
+  profile_id: string | null;
+  muted: boolean;
+};
+
+export type AdminTicketRow = Ticket & {
+  holder_name: string | null;
+  holder_email: string | null;
+  holder_alias: string | null;
+  minted_by_name: string | null;
+};

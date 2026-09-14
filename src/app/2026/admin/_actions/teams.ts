@@ -9,12 +9,15 @@ export async function getAllTeams(): Promise<AdminTeamRow[]> {
   await assertAdmin();
   const supabase = getSupabaseSecretClient();
 
-  const { data: teams } = await supabase
+  const { data: teams, error } = await supabase
     .from("teams")
     .select("*, team_members(id, role, joined_at, profile:profiles(full_name))")
     .eq("competition_year", COMPETITION_YEAR)
     .order("created_at", { ascending: false });
 
+  // A failed read must not render as an empty competition: "0 teams, $0
+  // collected" is indistinguishable from real data, so throw to the boundary.
+  if (error) throw new Error(`Could not load teams: ${error.message}`);
   if (!teams) return [];
 
   type MemberRow = {

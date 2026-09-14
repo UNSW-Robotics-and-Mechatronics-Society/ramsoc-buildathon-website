@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState, useTransition } from "react";
+import { Fragment, useOptimistic, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import type { AdminTeamRow, TeamWithMembers } from "@/app/_types/registration";
 import {
@@ -43,7 +43,18 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
+export default function TeamsTable({
+  teams: serverTeams,
+}: {
+  teams: AdminTeamRow[];
+}) {
+  // Paid/unpaid flips show immediately and are reconciled when the refresh
+  // lands, so the button reacts on click rather than after three round trips.
+  const [teams, setOptimisticPaid] = useOptimistic(
+    serverTeams,
+    (state, update: { id: string; paid: boolean }) =>
+      state.map((t) => (t.id === update.id ? { ...t, paid: update.paid } : t)),
+  );
   const [search, setSearch] = useState("");
   const [paidFilter, setPaidFilter] = useState("all");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -91,9 +102,11 @@ export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
 
   function handleAction(
     action: () => Promise<{ success: boolean; error?: string } | unknown>,
+    optimistic?: { id: string; paid: boolean },
   ) {
     startTransition(async () => {
       setError(null);
+      if (optimistic) setOptimisticPaid(optimistic);
       const result = await action();
       if (
         result &&
@@ -105,8 +118,11 @@ export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
       }
       setEditingName(null);
       setMovingMember(null);
+      // The page refresh and the roster re-fetch are independent reads, so
+      // they run together instead of back to back.
+      const detail = expandedId ? getTeamDetail(expandedId) : null;
       router.refresh();
-      if (expandedId) setDetail(await getTeamDetail(expandedId));
+      if (detail) setDetail(await detail);
     });
   }
 
@@ -364,8 +380,9 @@ export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
                                 tone={team.paid ? "neutral" : "primary"}
                                 disabled={isPending}
                                 onClick={() =>
-                                  handleAction(() =>
-                                    updateTeamPaid(team.id, !team.paid),
+                                  handleAction(
+                                    () => updateTeamPaid(team.id, !team.paid),
+                                    { id: team.id, paid: !team.paid },
                                   )
                                 }
                               >

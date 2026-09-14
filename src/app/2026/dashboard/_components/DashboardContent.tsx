@@ -11,6 +11,7 @@ import type {
   TeamBrowseItem,
 } from "@/app/_types/registration";
 import type { UserTask } from "@/app/2026/_actions/tasks";
+import type { Ticket } from "@/app/_types/market";
 import Card from "@/app/2026/_components/ui/Card";
 import Badge from "@/app/2026/_components/ui/Badge";
 import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
@@ -317,6 +318,7 @@ export default function DashboardContent({
   browsableTeams,
   adminTasks = [],
   capacity = null,
+  tickets = [],
 }: {
   profile: Profile;
   team: TeamWithMembers | null;
@@ -324,6 +326,7 @@ export default function DashboardContent({
   adminTasks?: UserTask[];
   /** Remaining team slots, or null when unknown. */
   capacity?: TeamCapacity | null;
+  tickets?: Ticket[];
 }) {
   const [tab, setTab] = useState<Tab>("home");
   const [mounted, setMounted] = useState(false);
@@ -332,6 +335,10 @@ export default function DashboardContent({
 
   useEffect(() => {
     setMounted(true);
+    // /dashboard#profile opens straight onto a tab, so the easter-egg popup
+    // can link to "my tickets" without a page of its own.
+    const wanted = window.location.hash.replace("#", "");
+    if ((TABS as string[]).includes(wanted)) setTab(wanted as Tab);
   }, []);
 
   function handleCompleteTask(taskId: string) {
@@ -500,7 +507,9 @@ export default function DashboardContent({
           )}
 
           {/* ── Profile ── */}
-          {tab === "profile" && <ProfileTab profile={profile} />}
+          {tab === "profile" && (
+            <ProfileTab profile={profile} tickets={tickets} />
+          )}
         </motion.div>
       </AnimatePresence>
 

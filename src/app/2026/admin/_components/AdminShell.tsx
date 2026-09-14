@@ -12,6 +12,7 @@ const tabs = [
   { label: "Individuals", href: Path[2026].AdminIndividuals },
   { label: "Tasks", href: Path[2026].AdminTasks },
   { label: "Timeline", href: Path[2026].AdminTimeline },
+  { label: "Market", href: Path[2026].AdminMarket },
   { label: "Settings", href: Path[2026].AdminSettings },
   { label: "UI", href: Path[2026].AdminUi },
 ];

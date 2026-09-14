@@ -35,6 +35,13 @@ export default function AdminError({
             : "Something went wrong reading the data for this page."}
         </p>
 
+        {/* Organisers only, so the raw message is more useful than a digest. */}
+        {!likelyMisconfigured && error.message && (
+          <p className="font-blueprint bg-blueprint-950 text-ink-dim mb-4 rounded-md border border-white/10 px-3 py-2 text-xs wrap-break-word">
+            {error.message}
+          </p>
+        )}
+
         {error.digest && (
           <p className="font-blueprint text-ink-dim mb-5 text-xs">
             Reference: {error.digest}
