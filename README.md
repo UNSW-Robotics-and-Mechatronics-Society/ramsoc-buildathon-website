@@ -81,6 +81,28 @@ src/app/
     admin/              organiser dashboard (separate password auth)
 ```
 
+## Capacity
+
+Entry is capped at **60 paid teams** (`PAID_TEAM_CAP` in
+`src/app/2026/_data/teamConfig.ts`). A slot is taken when a captain's card
+clears, not when a team is formed, so the count is simply `teams` with
+`paid = true` for the competition year.
+
+Three things follow from the cap:
+
+- `processPayment` counts paid teams immediately before charging and refuses
+  once the cap is reached. It fails **closed**: if the count cannot be read,
+  nothing is charged. The count and the charge are not one transaction, so two
+  captains paying for the last slot at the same instant can both succeed — the
+  money has already moved by then, so the team stays active and the overshoot
+  is written to `error_logs` for an organiser to sort out.
+- `createTeam` refuses new teams once the cap is reached, so nobody recruits a
+  roster they can never activate. Joining an existing team stays open.
+- The remaining count is advertised only once it drops below
+  `LOW_SLOTS_THRESHOLD` (10), in the hero, the participant portal and the
+  checkout. Above that it renders nothing, and if capacity cannot be read it
+  renders nothing rather than guessing.
+
 ## Admin
 
 `/2026/admin` is gated by a **shared password** in `ADMIN_PASSWORD`, entirely

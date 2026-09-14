@@ -13,6 +13,7 @@ import type {
 import type { UserTask } from "@/app/2026/_actions/tasks";
 import Card from "@/app/2026/_components/ui/Card";
 import Badge from "@/app/2026/_components/ui/Badge";
+import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
 import { completeTask } from "@/app/2026/_actions/tasks";
 import TeamCard from "./TeamCard";
 import MemberList from "./MemberList";
@@ -20,7 +21,10 @@ import JoinCodeDisplay from "./JoinCodeDisplay";
 import NoTeamState from "./NoTeamState";
 import LeaveTeamButton from "./LeaveTeamButton";
 import ProfileTab from "./ProfileTab";
-import { MEMBER_LIMITS } from "@/app/2026/_data/teamConfig";
+import {
+  MEMBER_LIMITS,
+  type TeamCapacity,
+} from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 
 type Tab = "home" | "team" | "profile";
@@ -312,11 +316,14 @@ export default function DashboardContent({
   team,
   browsableTeams,
   adminTasks = [],
+  capacity = null,
 }: {
   profile: Profile;
   team: TeamWithMembers | null;
   browsableTeams: TeamBrowseItem[];
   adminTasks?: UserTask[];
+  /** Remaining team slots, or null when unknown. */
+  capacity?: TeamCapacity | null;
 }) {
   const [tab, setTab] = useState<Tab>("home");
   const [mounted, setMounted] = useState(false);
@@ -347,6 +354,11 @@ export default function DashboardContent({
 
   return (
     <>
+      {/* Slots left, above the tabs so it is on every section of the portal.
+          A team that has already paid holds its slot, so the notice would be
+          nothing but noise for them. */}
+      {!isPaid && <SlotsRemaining capacity={capacity} className="mb-5" />}
+
       <TabStrip tab={tab} setTab={setTab} />
 
       <AnimatePresence mode="wait">
@@ -468,7 +480,11 @@ export default function DashboardContent({
             <div className="flex flex-col gap-4 sm:gap-5">
               {team ? (
                 <>
-                  <TeamCard team={team} isCaptain={isCaptain} />
+                  <TeamCard
+                    team={team}
+                    isCaptain={isCaptain}
+                    capacity={capacity}
+                  />
                   <JoinCodeDisplay code={team.join_code} />
                   <MemberList
                     members={team.members}

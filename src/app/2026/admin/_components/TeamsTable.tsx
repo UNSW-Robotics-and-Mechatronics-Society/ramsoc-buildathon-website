@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { AdminTeamRow, TeamWithMembers } from "@/app/_types/registration";
 import {
   MEMBER_LIMITS,
+  PAID_TEAM_CAP,
   formatAud,
   getEntryFeeCents,
 } from "@/app/2026/_data/teamConfig";
@@ -111,10 +112,16 @@ export default function TeamsTable({ teams }: { teams: AdminTeamRow[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         <Stat label="Teams" value={String(teams.length)} />
-        <Stat label="Paid" value={String(paidCount)} />
+        <Stat label="Paid" value={`${paidCount} / ${PAID_TEAM_CAP}`} />
         <Stat label="Unpaid" value={String(teams.length - paidCount)} />
+        {/* Paying is capped, so this is the number that decides whether the
+            entry fee is still being collected at all. */}
+        <Stat
+          label="Slots left"
+          value={String(Math.max(PAID_TEAM_CAP - paidCount, 0))}
+        />
         <Stat
           label={`Collected @ ${formatAud(entryFeeCents)}`}
           value={formatAud(paidCount * entryFeeCents)}
