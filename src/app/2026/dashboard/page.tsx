@@ -4,6 +4,7 @@ import { getProfile } from "@/app/2026/_actions/profile";
 import { getMyTeam, browseTeams } from "@/app/2026/_actions/team";
 import { getActiveTasks } from "@/app/2026/_actions/tasks";
 import { getTeamCapacity } from "@/app/2026/_actions/capacity";
+import { getMyTickets } from "@/app/2026/_actions/tickets";
 import Path from "@/app/path";
 import DashboardContent from "./_components/DashboardContent";
 
@@ -16,10 +17,11 @@ export default async function DashboardPage() {
     redirect(Path[2026].Onboarding);
   }
 
-  const [team, tasks, capacity] = await Promise.all([
+  const [team, tasks, capacity, tickets] = await Promise.all([
     getMyTeam(),
     getActiveTasks(),
     getTeamCapacity(),
+    getMyTickets(),
   ]);
   const browsable = team ? [] : await browseTeams();
 
@@ -72,6 +74,7 @@ export default async function DashboardPage() {
         browsableTeams={browsable}
         adminTasks={tasks}
         capacity={capacity}
+        tickets={tickets}
       />
     </main>
   );

@@ -318,6 +318,7 @@ export default function DashboardContent({
   browsableTeams,
   adminTasks = [],
   capacity = null,
+  tickets = [],
 }: {
   profile: Profile;
   team: TeamWithMembers | null;
@@ -325,6 +326,7 @@ export default function DashboardContent({
   adminTasks?: UserTask[];
   /** Remaining team slots, or null when unknown. */
   capacity?: TeamCapacity | null;
+  tickets?: Ticket[];
 }) {
   const [tab, setTab] = useState<Tab>("home");
   const [mounted, setMounted] = useState(false);
