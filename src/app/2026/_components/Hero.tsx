@@ -3,7 +3,9 @@ import Link from "next/link";
 import Path from "@/app/path";
 import BuildTypewriter from "@/app/2026/_components/BuildTypewriter";
 import CountdownStages from "@/app/2026/_components/CountdownStages";
+import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
 import { getAppConfig } from "@/app/2026/_actions/appConfig";
+import { getTeamCapacity } from "@/app/2026/_actions/capacity";
 import { DISCORD_INVITE } from "@/app/2026/_data/socials";
 import {
   getCountdownStages,
@@ -21,7 +23,11 @@ const SPECS = [
 ];
 
 export default async function Hero() {
-  const stages = getCountdownStages(await getAppConfig());
+  const [config, capacity] = await Promise.all([
+    getAppConfig(),
+    getTeamCapacity(),
+  ]);
+  const stages = getCountdownStages(config);
 
   return (
     <section className="relative overflow-hidden">
@@ -66,6 +72,10 @@ export default async function Hero() {
               initialPhase={resolveCountdownPhase(stages)}
             />
           </div>
+
+          {/* Renders nothing until the last few slots, so the hero is not
+              permanently shouting about numbers. */}
+          <SlotsRemaining capacity={capacity} className="mb-6 max-w-xl" />
 
           <div className="flex flex-wrap items-center gap-4">
             <Link href={Path[2026].SignUp} className="button">

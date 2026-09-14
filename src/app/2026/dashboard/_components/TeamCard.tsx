@@ -11,18 +11,27 @@ import {
   MEMBER_LIMITS,
   getEntryFeeCents,
   formatAud,
+  type TeamCapacity,
 } from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 
 export default function TeamCard({
   team,
   isCaptain = false,
+  capacity = null,
 }: {
   team: TeamWithMembers;
   isCaptain?: boolean;
+  /** Remaining team slots, or null when unknown. */
+  capacity?: TeamCapacity | null;
 }) {
   const memberCount = team.members.length;
-  const canActivate = !team.paid && memberCount >= MEMBER_LIMITS.min;
+  // Unknown capacity is not treated as full: the payment action counts again
+  // before it charges, so the worst case here is a button that opens a
+  // checkout which then explains the event is full.
+  const soldOut = capacity?.soldOut ?? false;
+  const canActivate =
+    !team.paid && !soldOut && memberCount >= MEMBER_LIMITS.min;
   const membersNeeded = MEMBER_LIMITS.min - memberCount;
   const needsMoreMembers = !team.paid && membersNeeded > 0;
   // Base entry fee only. The Square processing gross-up is computed once, on
@@ -148,8 +157,9 @@ export default function TeamCard({
             </span>
           </div>
           <p className="font-main text-ink-dim mb-3 text-sm">
-            Your team is not active yet. The captain pays the flat entry fee
-            once to lock in your place.
+            {soldOut
+              ? `All ${capacity?.cap} team slots have been taken, so the entry fee is no longer being collected. Contact an organiser about the waitlist.`
+              : "Your team is not active yet. The captain pays the flat entry fee once to lock in your place."}
           </p>
 
           {canActivate && isCaptain ? (
@@ -166,11 +176,15 @@ export default function TeamCard({
             </Button>
           ) : (
             <Button size="full" disabled className="cursor-not-allowed">
-              {!isCaptain ? "Only the captain can pay" : "Pay entry fee"}
+              {soldOut
+                ? "Entries are full"
+                : !isCaptain
+                  ? "Only the captain can pay"
+                  : "Pay entry fee"}
             </Button>
           )}
 
-          {needsMoreMembers && (
+          {needsMoreMembers && !soldOut && (
             <p className="font-main text-ink-dim mt-2 text-center text-xs">
               {membersNeeded} more member{membersNeeded !== 1 ? "s" : ""} needed
               to activate (minimum {MEMBER_LIMITS.min}).

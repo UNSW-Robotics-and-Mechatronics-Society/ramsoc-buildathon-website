@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/app/2026/_components/ui/Button";
+import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
 import { processPayment, type PaymentQuote } from "@/app/2026/_actions/payment";
-import { formatAud } from "@/app/2026/_data/teamConfig";
+import { formatAud, type TeamCapacity } from "@/app/2026/_data/teamConfig";
 import Path from "@/app/path";
 
 /* ------------------------------------------------------------------ */
@@ -188,11 +189,14 @@ export default function PaymentForm({
   teamName,
   memberCount,
   quote,
+  capacity = null,
 }: {
   teamName: string;
   memberCount: number;
   /** Computed server-side by getPaymentQuote(). Never recomputed here. */
   quote: PaymentQuote;
+  /** Remaining team slots, or null when unknown. */
+  capacity?: TeamCapacity | null;
 }) {
   const router = useRouter();
 
@@ -500,6 +504,10 @@ export default function PaymentForm({
         <p className="spec-label">RAMSoc Buildathon 2026 &middot; Checkout</p>
         <h1 className="mt-1 text-3xl sm:text-4xl">Pay entry fee</h1>
       </div>
+
+      {/* Last few slots. The checkout is where this matters most, so it sits
+          above the summary rather than below the fold. */}
+      <SlotsRemaining capacity={capacity} />
 
       {/* ---------------------- order summary ---------------------- */}
       <section

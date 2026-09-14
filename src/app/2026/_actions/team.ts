@@ -3,7 +3,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { getSupabaseSecretClient } from "@/app/_utils/supabase";
 import { logError } from "@/app/_utils/errorLog";
-import { MEMBER_LIMITS, COMPETITION_YEAR } from "@/app/2026/_data/teamConfig";
+import {
+  MEMBER_LIMITS,
+  COMPETITION_YEAR,
+  PAID_TEAM_CAP,
+} from "@/app/2026/_data/teamConfig";
 import { getLiveRegistrationStatus } from "@/app/2026/_actions/appConfig";
 import type { TeamWithMembers, TeamBrowseItem } from "@/app/_types/registration";
 
@@ -94,6 +98,28 @@ async function registrationClosedError(): Promise<string | null> {
     : "Registration has closed";
 }
 
+/**
+ * Capacity guard for *new* teams. Once the paid cap is reached a team formed
+ * now could never activate, so it is kinder to say so at the point of creation
+ * than to let a captain recruit five people and then hit a wall at checkout.
+ *
+ * Joining is deliberately not gated: an existing team either holds a paid slot
+ * already or is racing for one, and either way another pair of hands helps.
+ * A failed count is treated as "not full" — this only ever costs someone a
+ * clearer error message later, it cannot take money.
+ */
+async function capacityFullError(): Promise<string | null> {
+  const supabase = getSupabaseSecretClient();
+  const { count, error } = await supabase
+    .from("teams")
+    .select("id", { count: "exact", head: true })
+    .eq("competition_year", COMPETITION_YEAR)
+    .eq("paid", true);
+
+  if (error || count === null || count < PAID_TEAM_CAP) return null;
+  return `Buildathon 2026 is full: all ${PAID_TEAM_CAP} team slots have been taken. You can still join an existing team, or contact an organiser about the waitlist.`;
+}
+
 // ── createTeam ───────────────────────────────────────────────────────────────
 
 export async function createTeam(
@@ -104,6 +130,9 @@ export async function createTeam(
 
   const closed = await registrationClosedError();
   if (closed) return { success: false, error: closed };
+
+  const full = await capacityFullError();
+  if (full) return { success: false, error: full };
 
   const trimmed = name.trim();
   if (!trimmed) return { success: false, error: "Team name is required" };

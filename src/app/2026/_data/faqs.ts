@@ -35,6 +35,11 @@ export const FAQS: Faq[] = [
       "$50 per team, not per person. Your team captain pays once through the dashboard after the team has at least 2 members. The fee covers your hardware kit and the shop credit you start with.",
   },
   {
+    question: "Is there a limit on how many teams can enter?",
+    answer:
+      "Yes. Kits, mentors and the makerspace only stretch to 60 teams, so entry closes once 60 teams have paid, whether or not the registration deadline has passed. The homepage shows how many slots are left once it is down to the last handful. Forming a team does not hold a slot; paying the entry fee does.",
+  },
+  {
     question: "What is in the kit?",
     answer:
       "An ESP32 development board, a breadboard, an assortment of resistors and LEDs, and a USB cable. That is enough to get a working prototype going on night one. Anything beyond that comes from the shop.",
