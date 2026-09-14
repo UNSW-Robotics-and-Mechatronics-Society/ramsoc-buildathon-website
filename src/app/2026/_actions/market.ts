@@ -38,8 +38,6 @@ type Member = {
 export type MarketAccess =
   | { state: "signed-out" }
   | { state: "no-profile" }
-  | { state: "no-team" }
-  | { state: "unpaid"; isCaptain: boolean }
   | { state: "closed" }
   | { state: "muted" }
   | { state: "ok" };
@@ -59,8 +57,9 @@ async function isMarketOpen(supabase: SupabaseClient): Promise<boolean> {
 }
 
 /**
- * The full gate: signed in, onboarded, on a team, team has paid, market is
- * open, not muted. Every action runs this, the page too.
+ * The full gate: signed in, registered, market is open, not muted. Open to
+ * every registered participant regardless of team or payment status, the
+ * market is not a perk of paying, it is just a room on the site.
  */
 async function resolveAccess(): Promise<{
   access: MarketAccess;
@@ -78,23 +77,6 @@ async function resolveAccess(): Promise<{
     .eq("clerk_user_id", userId)
     .maybeSingle();
   if (!profile) return { access: { state: "no-profile" }, supabase };
-
-  const { data: membership } = await supabase
-    .from("team_members")
-    .select("role, team:teams(paid)")
-    .eq("profile_id", profile.id)
-    .maybeSingle();
-  if (!membership) return { access: { state: "no-team" }, supabase };
-
-  const team = Array.isArray(membership.team)
-    ? membership.team[0]
-    : membership.team;
-  if (!team?.paid) {
-    return {
-      access: { state: "unpaid", isCaptain: membership.role === "captain" },
-      supabase,
-    };
-  }
 
   if (!(await isMarketOpen(supabase))) {
     return { access: { state: "closed" }, supabase };
@@ -442,22 +424,13 @@ export async function handOverTicket(
 
   const { data: recipient } = await supabase
     .from("profiles")
-    .select("id, market_alias, market_muted, team_members(team:teams(paid))")
+    .select("id, market_alias, market_muted")
     .ilike("market_alias", target)
     .maybeSingle();
   if (!recipient) {
     return { success: false, error: "No dealer by that name." };
   }
-
-  const membership = Array.isArray(recipient.team_members)
-    ? recipient.team_members[0]
-    : recipient.team_members;
-  const team = membership
-    ? Array.isArray(membership.team)
-      ? membership.team[0]
-      : membership.team
-    : null;
-  if (!team?.paid || recipient.market_muted) {
+  if (recipient.market_muted) {
     return { success: false, error: "They are not in the market any more." };
   }
 
