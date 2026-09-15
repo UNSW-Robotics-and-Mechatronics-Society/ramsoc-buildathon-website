@@ -23,7 +23,7 @@ export const TICKET_CLASSES: Record<
  */
 export const EGGS = {
   logo6: {
-    class: "A",
+    class: "B",
     title: "Six taps",
     blurb: "You knocked on the logo six times. Somebody answered.",
   },
@@ -48,11 +48,6 @@ export const EGGS = {
     // No odds quoted: SLIP_ODDS is tuned from time to time and prose does not
     // follow it.
     blurb: "You caught the typewriter slipping, and you were quick enough to grab it.",
-  },
-  cornerRambo: {
-    class: "C",
-    title: "Caught him",
-    blurb: "He was only half in the room. You grabbed him anyway.",
   },
 } as const satisfies Record<
   string,
