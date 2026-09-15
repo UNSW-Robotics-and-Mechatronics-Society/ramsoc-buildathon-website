@@ -69,7 +69,8 @@ function TicketsSection({
       {tickets.length === 0 ? (
         <p className="font-main text-ink-dim text-sm">
           None yet. Tickets from workshops are handed out in person; a few
-          bonus ones are hidden around this site.
+          bonus ones are hidden around this site, one per team each &mdash; so
+          a teammate may already have found some.
         </p>
       ) : (
         <ul className="flex flex-col gap-4 pt-1">
