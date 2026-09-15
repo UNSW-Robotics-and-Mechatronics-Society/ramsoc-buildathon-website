@@ -70,5 +70,9 @@ export type AdminTicketRow = Ticket & {
   holder_name: string | null;
   holder_email: string | null;
   holder_alias: string | null;
+  /** The holder's team. Null if they are not on one. */
+  holder_team: string | null;
   minted_by_name: string | null;
+  /** The team that claimed the egg, which is who the ticket was minted for. */
+  minted_by_team: string | null;
 };
