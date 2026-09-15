@@ -107,7 +107,9 @@ export default function MarketPanel({
       t.serial.toLowerCase().includes(tq) ||
       (t.holder_name ?? "").toLowerCase().includes(tq) ||
       (t.holder_alias ?? "").toLowerCase().includes(tq) ||
-      (t.holder_email ?? "").toLowerCase().includes(tq)
+      (t.holder_email ?? "").toLowerCase().includes(tq) ||
+      (t.holder_team ?? "").toLowerCase().includes(tq) ||
+      (t.minted_by_team ?? "").toLowerCase().includes(tq)
     );
   });
 
@@ -285,7 +287,7 @@ export default function MarketPanel({
             label="Search"
             value={ticketSearch}
             onChange={setTicketSearch}
-            placeholder="Serial, holder, alias, or email"
+            placeholder="Serial, holder, team, alias, or email"
             className="min-w-[16rem] flex-1 sm:max-w-sm"
           />
           <p className="font-blueprint text-ink-dim pb-3 text-xs uppercase">
@@ -303,6 +305,7 @@ export default function MarketPanel({
                 <Th>Serial</Th>
                 <Th>Class</Th>
                 <Th>Held by</Th>
+                <Th>Team</Th>
                 <Th>From</Th>
                 <Th>Minted by</Th>
                 <Th align="right">Traded</Th>
@@ -311,7 +314,7 @@ export default function MarketPanel({
             </thead>
             <tbody>
               {visibleTickets.length === 0 && (
-                <EmptyRow colSpan={7}>
+                <EmptyRow colSpan={8}>
                   {tickets.length === 0
                     ? "No tickets have been claimed yet."
                     : "No tickets match that search."}
@@ -342,11 +345,28 @@ export default function MarketPanel({
                       )}
                     </p>
                   </td>
+                  <td className="px-3 py-2.5">
+                    {t.holder_team ? (
+                      <span className="font-main text-ink text-sm">
+                        {t.holder_team}
+                      </span>
+                    ) : (
+                      <StatusPill tone="neutral">No team</StatusPill>
+                    )}
+                  </td>
                   <td className="font-main text-ink-dim px-3 py-2.5 text-sm">
                     {isEggSource(t.source) ? EGGS[t.source].title : t.source}
                   </td>
                   <td className="font-main text-ink-dim px-3 py-2.5 text-sm">
                     {t.minted_by_name ?? "-"}
+                    {/* Eggs are claimed once per team, so a ticket sitting
+                        under a different team than it was minted for has been
+                        traded across. */}
+                    {t.minted_by_team && t.minted_by_team !== t.holder_team && (
+                      <span className="font-blueprint text-ink-dim/70 mt-0.5 block text-xs">
+                        for {t.minted_by_team}
+                      </span>
+                    )}
                   </td>
                   <td className="font-blueprint text-ink-dim px-3 py-2.5 text-right text-sm tabular-nums">
                     {t.transfer_count > 0 ? `×${t.transfer_count}` : "-"}

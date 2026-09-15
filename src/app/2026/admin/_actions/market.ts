@@ -34,7 +34,7 @@ export async function getAdminMarket(): Promise<{
     supabase
       .from("tickets")
       .select(
-        "id, serial, class, source, minted_at, transfer_count, holder:profiles!tickets_holder_id_fkey(full_name, email, market_identities(alias)), minter:profiles!tickets_minted_by_fkey(full_name)",
+        "id, serial, class, source, minted_at, transfer_count, holder:profiles!tickets_holder_id_fkey(full_name, email, market_identities(alias), team_members(team:teams(name))), minter:profiles!tickets_minted_by_fkey(full_name, team_members(team:teams(name)))",
       )
       .eq("competition_year", COMPETITION_YEAR)
       .order("minted_at", { ascending: false }),
@@ -74,6 +74,11 @@ export async function getAdminMarket(): Promise<{
       const holder = one(t.holder);
       const minter = one(t.minter);
       const holderDealer = one(holder?.market_identities);
+      // One team per person, so the first membership is the only one.
+      type WithTeam = { team_members?: { team?: { name?: string }[] | { name?: string } | null }[] | null } | null;
+      const teamOf = (p: WithTeam): string | null =>
+        one(one(p?.team_members)?.team)?.name ?? null;
+
       return {
         id: t.id,
         serial: t.serial,
@@ -84,7 +89,9 @@ export async function getAdminMarket(): Promise<{
         holder_name: holder?.full_name ?? null,
         holder_email: holder?.email ?? null,
         holder_alias: holderDealer?.alias ?? null,
+        holder_team: teamOf(holder),
         minted_by_name: minter?.full_name ?? null,
+        minted_by_team: teamOf(minter),
       } as AdminTicketRow;
     }),
   };
