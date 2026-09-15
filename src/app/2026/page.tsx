@@ -6,7 +6,6 @@ import Faq from "@/app/2026/_components/Faq";
 import Sponsors from "@/app/2026/_components/Sponsors";
 import Support from "@/app/2026/_components/Support";
 import FindTeamCallout from "@/app/2026/_components/FindTeamCallout";
-import RamboWhisper from "@/app/2026/_components/eggs/RamboWhisper";
 import CornerRambo from "@/app/2026/_components/eggs/CornerRambo";
 
 /**
@@ -36,8 +35,7 @@ export default function Home() {
       <Sponsors />
       <Support />
 
-      {/* Easter eggs. Neither renders anything until triggered. */}
-      <RamboWhisper />
+      {/* Easter egg. Renders nothing until he turns up. */}
       <CornerRambo />
     </>
   );

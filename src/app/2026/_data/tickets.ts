@@ -37,23 +37,20 @@ export const EGGS = {
     title: "Six seven",
     blurb: "Six... seven. You know what you did.",
   },
-  typeRambo: {
-    class: "C",
-    title: "Said his name",
-    blurb: "You typed it. He heard.",
-  },
   faq17: {
     class: "C",
     title: "The seventeenth question",
     blurb: "You opened every single FAQ. Nobody does that.",
   },
   typewriter: {
-    class: "B",
+    class: "C",
     title: "Read the fine print",
-    blurb: "One in fifty. You caught the typewriter slipping.",
+    // No odds quoted: SLIP_ODDS is tuned from time to time and prose does not
+    // follow it.
+    blurb: "You caught the typewriter slipping, and you were quick enough to grab it.",
   },
   cornerRambo: {
-    class: "B",
+    class: "C",
     title: "Caught him",
     blurb: "He was only half in the room. You grabbed him anyway.",
   },
