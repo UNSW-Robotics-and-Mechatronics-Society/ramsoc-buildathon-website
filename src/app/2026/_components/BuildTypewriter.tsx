@@ -19,7 +19,7 @@ const HOLD_EMPTY_MS = 350;
  * it, and click it, gets a ticket.
  */
 const SLIP = "a black market";
-const SLIP_ODDS = 1 / 50;
+const SLIP_ODDS = 1 / 10;
 const HOLD_SLIP_MS = 4500;
 
 /**
