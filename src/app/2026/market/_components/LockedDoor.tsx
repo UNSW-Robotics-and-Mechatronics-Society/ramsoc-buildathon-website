@@ -7,7 +7,13 @@ import Path from "@/app/path";
  * why the doorman will not let this particular person in.
  */
 
-type Shut = Exclude<MarketAccess, { state: "ok" }>;
+/**
+ * `{ state: "error" }` is not a real access outcome, `resolveAccess()` never
+ * returns it. The page uses it for the one case that is not "someone is
+ * turned away on purpose": an unhandled failure reading the market, so the
+ * sign never claims a shutdown nobody actually chose.
+ */
+type Shut = Exclude<MarketAccess, { state: "ok" }> | { state: "error" };
 
 function signFor(access: Shut): {
   title: string;
@@ -34,6 +40,12 @@ function signFor(access: Shut): {
       return {
         title: "You've been asked to leave.",
         body: "Talk to a RAMSoc organiser if you think that's a mistake.",
+        cta: { label: "Back to Buildathon", href: Path[2026].Root },
+      };
+    case "error":
+      return {
+        title: "The lights are out.",
+        body: "Something's wrong on our end, not a deliberate close. Try again shortly, or tell an organiser if it keeps happening.",
         cta: { label: "Back to Buildathon", href: Path[2026].Root },
       };
   }

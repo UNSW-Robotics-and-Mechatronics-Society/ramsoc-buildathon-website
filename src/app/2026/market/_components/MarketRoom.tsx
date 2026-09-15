@@ -453,7 +453,8 @@ export default function MarketRoom({ initial }: { initial: Room }) {
                   : `${online.length} other dealer${online.length === 1 ? "" : "s"} around`}
               </p>
               <p className="font-blueprint text-ink-dim/60 text-[0.6rem] uppercase">
-                Names are fake. Organisers can see everything.
+                Names are fake. Organisers can see everything. Messages purge
+                after 3 hours.
               </p>
             </div>
 

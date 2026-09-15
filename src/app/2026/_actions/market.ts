@@ -14,6 +14,7 @@ import type {
 import {
   MARKET_HISTORY,
   MARKET_MESSAGE_MAX,
+  MARKET_MESSAGE_TTL_MS,
   MARKET_PRESENCE_MS,
   MARKET_RATE_LIMIT_MS,
   randomAliasParts,
@@ -60,6 +61,31 @@ async function isMarketOpen(supabase: SupabaseClient): Promise<boolean> {
     .eq("competition_year", COMPETITION_YEAR)
     .maybeSingle();
   return (data?.market_open as boolean | undefined) ?? true;
+}
+
+/**
+ * Hard-delete anything older than MARKET_MESSAGE_TTL_MS, moderation records
+ * included. There is no scheduled job behind this, it runs opportunistically
+ * on read (see call sites below). Returns the purged ids so a live poll can
+ * tell already-open clients to drop them, the same way a moderator's delete
+ * does.
+ */
+async function purgeOldMessages(supabase: SupabaseClient): Promise<string[]> {
+  const cutoff = new Date(Date.now() - MARKET_MESSAGE_TTL_MS).toISOString();
+  const { data, error } = await supabase
+    .from("market_messages")
+    .delete()
+    .lt("created_at", cutoff)
+    .select("id");
+
+  if (error) {
+    // Never let housekeeping take the room down. It catches up next visit.
+    await logError("market.purge", "Failed to purge old messages", {
+      error: error.message,
+    });
+    return [];
+  }
+  return (data ?? []).map((d) => d.id as string);
 }
 
 /**
@@ -258,6 +284,9 @@ export async function enterMarket(): Promise<
     return { access: access as Exclude<MarketAccess, { state: "ok" }> };
   }
 
+  // Sweep before reading, so a fresh arrival never sees expired history.
+  await purgeOldMessages(supabase);
+
   const identity = await ensureIdentity(supabase, member);
 
   const [{ data: rows }, dealers, tickets] = await Promise.all([
@@ -313,6 +342,11 @@ export async function pollMarket(input: {
 
   const since = Number.isNaN(Date.parse(input.since)) ? now : input.since;
 
+  // Swept on the heartbeat cadence (~every 8th poll) rather than every 3s
+  // tick, a hard delete is heavier than a plain select and there is no need
+  // to run it that often for a 3-hour window.
+  const purgedIds = input.heartbeat ? await purgeOldMessages(supabase) : [];
+
   const [{ data: rows }, { data: deleted }, dealers] = await Promise.all([
     supabase
       .from("market_messages")
@@ -338,7 +372,7 @@ export async function pollMarket(input: {
     messages: ((rows ?? []) as MessageRow[]).map((r) =>
       toMessage(r, member.clerkUserId),
     ),
-    deletedIds: (deleted ?? []).map((d) => d.id as string),
+    deletedIds: [...(deleted ?? []).map((d) => d.id as string), ...purgedIds],
     dealers,
     open: true,
     now,

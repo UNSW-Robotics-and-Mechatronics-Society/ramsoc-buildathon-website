@@ -19,6 +19,16 @@ export const MARKET_PRESENCE_MS = 2 * 60 * 1000;
 /** Messages loaded on first open. Older history is not paged in. */
 export const MARKET_HISTORY = 120;
 
+/**
+ * Nothing in the room is kept: a message older than this is hard-deleted the
+ * next time anyone visits or polls the market, moderation records included.
+ * There is no scheduled job behind this, it is swept opportunistically on
+ * read, which is effectively continuous while anyone is in the room (the
+ * client polls every MARKET_POLL_MS) and catches up the moment someone next
+ * opens the door if the room sat empty for a while.
+ */
+export const MARKET_MESSAGE_TTL_MS = 3 * 60 * 60 * 1000;
+
 // ── aliases ──────────────────────────────────────────────────────────────────
 
 /*

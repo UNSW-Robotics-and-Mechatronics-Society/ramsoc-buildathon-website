@@ -138,7 +138,14 @@ export default function MarketPanel({
 
       {/* ── messages ── */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-xl">Messages</h2>
+        <div>
+          <h2 className="font-display text-xl">Messages</h2>
+          <p className="font-main text-ink-dim mt-1 text-sm">
+            Nothing here is kept: any message, deleted ones included, is
+            hard-purged 3 hours after it was sent. This list only ever shows
+            what is still in the database right now.
+          </p>
+        </div>
         <div className="flex flex-wrap items-end gap-3">
           <SearchField
             label="Search"
