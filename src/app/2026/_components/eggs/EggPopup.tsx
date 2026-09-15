@@ -19,9 +19,17 @@ export type EggPhase =
   | { state: "loading" }
   | { state: "unclaimed" }
   | { state: "claiming" }
-  | { state: "claimed"; ticket: Ticket | null; fresh: boolean }
+  | {
+      state: "claimed";
+      ticket: Ticket | null;
+      fresh: boolean;
+      /** False when a teammate found it first: the team's one ticket is theirs. */
+      mine: boolean;
+      finder: string | null;
+    }
   | { state: "signed-out" }
   | { state: "no-profile" }
+  | { state: "no-team" }
   | { state: "error"; message: string };
 
 /** Brick confetti: a handful of studded tiles tumbling past the ticket. */
@@ -120,17 +128,31 @@ export default function EggPopup({
           {claimed
             ? phase.fresh
               ? "Ticket printed"
-              : "Already claimed"
+              : phase.mine
+                ? "Already claimed"
+                : "Beaten to it"
             : "You found something"}
         </h2>
         <p className="font-main text-ink-dim mt-2 text-sm">
-          {claimed
-            ? phase.ticket
-              ? phase.fresh
-                ? `A ${spec.label} component-shop ticket, saved to your account. Show it at a workshop, or take it to the Black Market.`
-                : "This one is already in your account."
-              : "You claimed this one before and have since traded it away."
-            : `${egg.blurb} That's worth a ${spec.label} component-shop ticket.`}
+          {claimed ? (
+            !phase.mine ? (
+              <>
+                {phase.finder ?? "A teammate"} found this one first, and each
+                egg is worth one ticket per team. Ask them nicely, or go and
+                find one they haven&apos;t.
+              </>
+            ) : phase.ticket ? (
+              phase.fresh ? (
+                `A ${spec.label} component-shop ticket, saved to your account. Show it at a workshop, or take it to the Black Market.`
+              ) : (
+                "This one is already in your account."
+              )
+            ) : (
+              "You claimed this one before and have since traded it away."
+            )
+          ) : (
+            `${egg.blurb} That's worth a ${spec.label} component-shop ticket for your team.`
+          )}
         </p>
 
         {/* The reveal: a claimed ticket prints out, an unclaimed one sits
@@ -200,6 +222,18 @@ export default function EggPopup({
               </Link>
               <p className="font-main text-ink-dim text-center text-xs">
                 Come back to this page afterwards and the ticket is yours.
+              </p>
+            </>
+          )}
+
+          {phase.state === "no-team" && (
+            <>
+              <Link href={Path[2026].Dashboard} className="button w-full text-base">
+                Go to my dashboard
+              </Link>
+              <p className="font-main text-ink-dim text-center text-xs">
+                Tickets are earned one per team, so you need a team before you
+                can claim. Find one from your dashboard, then come back.
               </p>
             </>
           )}

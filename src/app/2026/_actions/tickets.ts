@@ -40,6 +40,36 @@ async function myProfileId(): Promise<string | null> {
   return (data?.id as string | undefined) ?? null;
 }
 
+/**
+ * Who I am and which team I claim for. Eggs are once per team, so the team is
+ * what the claim is keyed on; the profile is recorded as the finder.
+ */
+async function myMembership(): Promise<{
+  profileId: string;
+  teamId: string | null;
+} | null> {
+  const { userId } = await auth();
+  if (!userId) return null;
+
+  const supabase = getSupabaseSecretClient();
+  const { data } = await supabase
+    .from("profiles")
+    .select("id, team_members(team_id)")
+    .eq("clerk_user_id", userId)
+    .maybeSingle();
+
+  if (!data) return null;
+
+  const membership = Array.isArray(data.team_members)
+    ? data.team_members[0]
+    : data.team_members;
+
+  return {
+    profileId: data.id as string,
+    teamId: (membership?.team_id as string | undefined) ?? null,
+  };
+}
+
 export async function getMyTickets(): Promise<Ticket[]> {
   const profileId = await myProfileId();
   if (!profileId) return [];
@@ -56,9 +86,17 @@ export async function getMyTickets(): Promise<Ticket[]> {
 export type EggStatus =
   | { state: "signed-out" }
   | { state: "no-profile" }
+  | { state: "no-team" }
   | { state: "unclaimed" }
-  /** Ticket is null if it has since been traded away. */
-  | { state: "claimed"; ticket: Ticket | null };
+  | {
+      state: "claimed";
+      /** The ticket I hold from it. Null if a teammate found it, or I traded it. */
+      ticket: Ticket | null;
+      /** True when I am the one who found it. */
+      mine: boolean;
+      /** Who found it, when that was not me. */
+      finder: string | null;
+    };
 
 export async function getEggStatus(source: string): Promise<EggStatus> {
   if (!isEggSource(source)) throw new Error("Unknown easter egg");
@@ -66,28 +104,46 @@ export async function getEggStatus(source: string): Promise<EggStatus> {
   const { userId } = await auth();
   if (!userId) return { state: "signed-out" };
 
-  const profileId = await myProfileId();
-  if (!profileId) return { state: "no-profile" };
+  const me = await myMembership();
+  if (!me) return { state: "no-profile" };
+  if (!me.teamId) return { state: "no-team" };
 
   const supabase = getSupabaseSecretClient();
   const { data: claim } = await supabase
     .from("ticket_claims")
-    .select("source")
-    .eq("profile_id", profileId)
+    .select("profile_id, finder:profiles(full_name)")
+    .eq("team_id", me.teamId)
     .eq("source", source)
     .maybeSingle();
 
   if (!claim) return { state: "unclaimed" };
 
+  const mine = claim.profile_id === me.profileId;
+  const finderRow = Array.isArray(claim.finder) ? claim.finder[0] : claim.finder;
+
+  if (!mine) {
+    return {
+      state: "claimed",
+      ticket: null,
+      mine: false,
+      finder: (finderRow?.full_name as string | undefined) ?? null,
+    };
+  }
+
   const { data: ticket } = await supabase
     .from("tickets")
     .select(TICKET_COLUMNS)
-    .eq("holder_id", profileId)
-    .eq("minted_by", profileId)
+    .eq("holder_id", me.profileId)
+    .eq("minted_by", me.profileId)
     .eq("source", source)
     .maybeSingle();
 
-  return { state: "claimed", ticket: (ticket as Ticket | null) ?? null };
+  return {
+    state: "claimed",
+    ticket: (ticket as Ticket | null) ?? null,
+    mine: true,
+    finder: null,
+  };
 }
 
 export type ClaimResult =
@@ -95,12 +151,13 @@ export type ClaimResult =
   | {
       success: false;
       error: string;
-      state?: "signed-out" | "no-profile" | "already-claimed";
+      state?: "signed-out" | "no-profile" | "no-team" | "already-claimed";
     };
 
 /**
  * Mint the ticket for an easter egg. The claim row is inserted first: its
- * primary key is the once-only gate, so two tabs racing can only mint one.
+ * primary key is (team_id, source), so the whole team gets one between them
+ * and two tabs racing, or two teammates racing, can only mint one.
  */
 export async function claimEggTicket(source: string): Promise<ClaimResult> {
   if (!isEggSource(source)) {
@@ -112,32 +169,41 @@ export async function claimEggTicket(source: string): Promise<ClaimResult> {
     return { success: false, error: "Sign in to claim it.", state: "signed-out" };
   }
 
-  const profileId = await myProfileId();
-  if (!profileId) {
+  const me = await myMembership();
+  if (!me) {
     return {
       success: false,
       error: "Finish registering first, then come back for it.",
       state: "no-profile",
     };
   }
+  if (!me.teamId) {
+    return {
+      success: false,
+      error: "Tickets are earned per team, so you need to be on one to claim.",
+      state: "no-team",
+    };
+  }
 
+  const profileId = me.profileId;
   const supabase = getSupabaseSecretClient();
   const cls = EGGS[source].class;
 
   const { error: claimError } = await supabase
     .from("ticket_claims")
-    .insert({ profile_id: profileId, source });
+    .insert({ team_id: me.teamId, profile_id: profileId, source });
 
   if (claimError) {
     if (claimError.code === UNIQUE_VIOLATION) {
       return {
         success: false,
-        error: "You have already claimed this one.",
+        error: "Your team has already claimed this one.",
         state: "already-claimed",
       };
     }
     await logError("tickets.claim", "Failed to record claim", {
       profileId,
+      teamId: me.teamId,
       source,
       error: claimError.message,
     });
@@ -163,14 +229,15 @@ export async function claimEggTicket(source: string): Promise<ClaimResult> {
     if (error?.code === UNIQUE_VIOLATION) continue;
 
     // Minting failed after the claim was recorded. Release the claim so the
-    // person is not locked out of an egg they never got a ticket for.
+    // team is not locked out of an egg nobody ever got a ticket for.
     await supabase
       .from("ticket_claims")
       .delete()
-      .eq("profile_id", profileId)
+      .eq("team_id", me.teamId)
       .eq("source", source);
     await logError("tickets.claim", "Failed to mint ticket", {
       profileId,
+      teamId: me.teamId,
       source,
       error: error?.message,
     });
@@ -180,7 +247,7 @@ export async function claimEggTicket(source: string): Promise<ClaimResult> {
   await supabase
     .from("ticket_claims")
     .delete()
-    .eq("profile_id", profileId)
+    .eq("team_id", me.teamId)
     .eq("source", source);
   return { success: false, error: "Could not print the ticket. Try again." };
 }

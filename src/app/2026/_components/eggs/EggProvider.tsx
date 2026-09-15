@@ -59,18 +59,32 @@ export default function EggProvider({
     try {
       const result = await claimEggTicket(egg);
       if (result.success) {
-        setPhase({ state: "claimed", ticket: result.ticket, fresh: true });
+        setPhase({
+          state: "claimed",
+          ticket: result.ticket,
+          fresh: true,
+          mine: true,
+          finder: null,
+        });
       } else if (result.state === "signed-out") {
         setPhase({ state: "signed-out" });
       } else if (result.state === "no-profile") {
         setPhase({ state: "no-profile" });
+      } else if (result.state === "no-team") {
+        setPhase({ state: "no-team" });
       } else if (result.state === "already-claimed") {
-        // Someone double-clicked, or a second tab beat this one. Show what
-        // they hold rather than an error.
+        // Double click, a second tab, or a teammate got there first. Show who
+        // holds it rather than an error.
         const status = await getEggStatus(egg);
         setPhase(
           status.state === "claimed"
-            ? { state: "claimed", ticket: status.ticket, fresh: false }
+            ? {
+                state: "claimed",
+                ticket: status.ticket,
+                fresh: false,
+                mine: status.mine,
+                finder: status.finder,
+              }
             : { state: "error", message: result.error },
         );
       } else {
@@ -91,8 +105,15 @@ export default function EggProvider({
         const status = await getEggStatus(egg);
         if (status.state === "signed-out") setPhase({ state: "signed-out" });
         else if (status.state === "no-profile") setPhase({ state: "no-profile" });
+        else if (status.state === "no-team") setPhase({ state: "no-team" });
         else if (status.state === "claimed") {
-          setPhase({ state: "claimed", ticket: status.ticket, fresh: false });
+          setPhase({
+            state: "claimed",
+            ticket: status.ticket,
+            fresh: false,
+            mine: status.mine,
+            finder: status.finder,
+          });
         } else if (autoClaim) {
           await claim(egg);
         } else {
