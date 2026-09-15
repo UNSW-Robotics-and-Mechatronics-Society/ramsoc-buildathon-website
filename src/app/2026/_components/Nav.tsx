@@ -45,10 +45,12 @@ export default function Nav() {
     }
   }
 
-  // Until Clerk resolves we show the neutral "Register" label rather than
-  // flashing the wrong call to action at a signed-in user.
-  const ctaHref = isSignedIn ? Path[2026].Dashboard : Path[2026].SignUp;
-  const ctaLabel = isLoaded && isSignedIn ? "Dashboard" : "Register";
+  // Registration has closed, so the signed-out call to action is a plain
+  // sign-in (the Clerk page still offers account creation, which the Black
+  // Market needs). Until Clerk resolves we show that neutral label rather
+  // than flashing the wrong one at a signed-in user.
+  const ctaHref = isSignedIn ? Path[2026].Dashboard : Path[2026].SignIn;
+  const ctaLabel = isLoaded && isSignedIn ? "Dashboard" : "Sign in";
 
   return (
     <header className="border-grid-major bg-blueprint-900/85 sticky top-0 z-50 border-b backdrop-blur-md">

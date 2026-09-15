@@ -13,8 +13,10 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function MarketPage() {
-  // The tab is on the public nav, so a database outage (or a local checkout
-  // with no Supabase credentials) shows the door shut, not a bare 500.
+  // The tab is on the public nav, so a database outage (or a schema not yet
+  // migrated) shows a locked door, not a bare 500. This is a real failure,
+  // though, distinct from "closed" (an admin decision) and "signed-out" /
+  // "muted" (this visitor specifically) — the sign says so honestly.
   let result: Awaited<ReturnType<typeof enterMarket>>;
   try {
     result = await enterMarket();
@@ -22,7 +24,7 @@ export default async function MarketPage() {
     await logError("market.enter", "Market unavailable", {
       error: err instanceof Error ? err.message : String(err),
     });
-    return <LockedDoor access={{ state: "closed" }} />;
+    return <LockedDoor access={{ state: "error" }} />;
   }
 
   if (!("room" in result)) {

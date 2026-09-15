@@ -7,7 +7,13 @@ import Path from "@/app/path";
  * why the doorman will not let this particular person in.
  */
 
-type Shut = Exclude<MarketAccess, { state: "ok" }>;
+/**
+ * `{ state: "error" }` is not a real access outcome, `resolveAccess()` never
+ * returns it. The page uses it for the one case that is not "someone is
+ * turned away on purpose": an unhandled failure reading the market, so the
+ * sign never claims a shutdown nobody actually chose.
+ */
+type Shut = Exclude<MarketAccess, { state: "ok" }> | { state: "error" };
 
 function signFor(access: Shut): {
   title: string;
@@ -22,13 +28,7 @@ function signFor(access: Shut): {
         title: "No name, no entry.",
         body: "The doorman needs to know who you are. Sign in to get past the door.",
         cta: { label: "Sign in", href: backHere },
-        secondary: { label: "Register", href: Path[2026].SignUp },
-      };
-    case "no-profile":
-      return {
-        title: "You're not on the list.",
-        body: "Finish registering first. Then come back and knock.",
-        cta: { label: "Finish registering", href: Path[2026].Onboarding },
+        secondary: { label: "Create an account", href: Path[2026].SignUp },
       };
     case "closed":
       return {
@@ -42,6 +42,12 @@ function signFor(access: Shut): {
         body: "Talk to a RAMSoc organiser if you think that's a mistake.",
         cta: { label: "Back to Buildathon", href: Path[2026].Root },
       };
+    case "error":
+      return {
+        title: "The lights are out.",
+        body: "Something's wrong on our end, try again shortly, or tell an organiser if it keeps happening.",
+        cta: { label: "Back to Buildathon", href: Path[2026].Root },
+      };
   }
 }
 
@@ -50,7 +56,10 @@ export default function LockedDoor({ access }: { access: Shut }) {
 
   return (
     <section className="market-wall relative flex min-h-[calc(100vh-8rem)] items-center justify-center overflow-hidden px-4 py-16">
-      <div className="flex w-full max-w-md flex-col items-center text-center">
+      <div aria-hidden className="market-lamp-glow market-lamp pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-grain pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-vignette pointer-events-none absolute inset-0" />
+      <div className="relative flex w-full max-w-md flex-col items-center text-center">
         <p className="font-blueprint text-[#d9a441] mb-6 text-xs uppercase">
           Back of the makerspace · Knock twice
         </p>
@@ -91,8 +100,9 @@ export default function LockedDoor({ access }: { access: Shut }) {
         </div>
 
         <p className="font-blueprint text-ink-dim/70 mt-10 max-w-xs text-[0.65rem] uppercase">
-          An anonymous room for registered participants to trade bonus
-          component-shop tickets. Organisers can see everything.
+          An anonymous room, open to anyone signed in. Registered entrants can
+          also trade bonus component-shop tickets. Organisers can see
+          everything.
         </p>
       </div>
     </section>

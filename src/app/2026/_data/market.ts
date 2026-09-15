@@ -7,8 +7,13 @@
 
 export const MARKET_MESSAGE_MAX = 500;
 
-/** Minimum gap between two messages from one person. */
-export const MARKET_RATE_LIMIT_MS = 1500;
+/**
+ * Minimum gap between two messages from one person. Sends are optimistic, so
+ * a message that trips this is pulled back out of the room after it appeared,
+ * which is jarring: the limit is set to stop flooding, not to pace a fast
+ * typist mid-haggle.
+ */
+export const MARKET_RATE_LIMIT_MS = 800;
 
 /** How often an open client asks for new messages. */
 export const MARKET_POLL_MS = 3000;
@@ -18,6 +23,16 @@ export const MARKET_PRESENCE_MS = 2 * 60 * 1000;
 
 /** Messages loaded on first open. Older history is not paged in. */
 export const MARKET_HISTORY = 120;
+
+/**
+ * Nothing in the room is kept: a message older than this is hard-deleted the
+ * next time anyone visits or polls the market, moderation records included.
+ * There is no scheduled job behind this, it is swept opportunistically on
+ * read, which is effectively continuous while anyone is in the room (the
+ * client polls every MARKET_POLL_MS) and catches up the moment someone next
+ * opens the door if the room sat empty for a while.
+ */
+export const MARKET_MESSAGE_TTL_MS = 3 * 60 * 60 * 1000;
 
 // ── aliases ──────────────────────────────────────────────────────────────────
 

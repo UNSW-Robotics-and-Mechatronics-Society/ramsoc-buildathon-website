@@ -5,16 +5,18 @@ import Resources from "@/app/2026/_components/Resources";
 import Faq from "@/app/2026/_components/Faq";
 import Sponsors from "@/app/2026/_components/Sponsors";
 import Support from "@/app/2026/_components/Support";
-import RegisterCta from "@/app/2026/_components/RegisterCta";
 import FindTeamCallout from "@/app/2026/_components/FindTeamCallout";
+import RamboWhisper from "@/app/2026/_components/eggs/RamboWhisper";
+import CornerRambo from "@/app/2026/_components/eggs/CornerRambo";
 
 /**
- * The hero reads live key dates and the remaining team slots, both of which
- * would otherwise be baked in at build time and never move again. Sixty
- * seconds is short enough that a slot count stays honest on a busy night and
- * long enough that the page is still served from cache under load.
+ * Served from the cache and regenerated at most every five minutes. The
+ * homepage reads the live key dates and timeline, but neither changes often,
+ * and under a crowd this is the difference between one database read every
+ * five minutes and one per visitor. Admin edits call revalidatePath() to skip
+ * the wait.
  */
-export const revalidate = 60;
+export const revalidate = 300;
 
 export default function Home() {
   return (
@@ -29,11 +31,14 @@ export default function Home() {
       </section>
 
       <Timeline />
-      <RegisterCta />
       <Resources />
       <Faq />
       <Sponsors />
       <Support />
+
+      {/* Easter eggs. Neither renders anything until triggered. */}
+      <RamboWhisper />
+      <CornerRambo />
     </>
   );
 }

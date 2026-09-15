@@ -43,7 +43,6 @@ export default async function PaymentPage() {
           teamName={team.name}
           memberCount={team.members.length}
           quote={quote}
-          capacity={capacity}
         />
       )}
     </main>

@@ -1,11 +1,8 @@
 import Image from "next/image";
-import Link from "next/link";
 import Path from "@/app/path";
 import BuildTypewriter from "@/app/2026/_components/BuildTypewriter";
 import CountdownStages from "@/app/2026/_components/CountdownStages";
-import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
 import { getAppConfig } from "@/app/2026/_actions/appConfig";
-import { getTeamCapacity } from "@/app/2026/_actions/capacity";
 import { DISCORD_INVITE } from "@/app/2026/_data/socials";
 import {
   getCountdownStages,
@@ -23,11 +20,7 @@ const SPECS = [
 ];
 
 export default async function Hero() {
-  const [config, capacity] = await Promise.all([
-    getAppConfig(),
-    getTeamCapacity(),
-  ]);
-  const stages = getCountdownStages(config);
+  const stages = getCountdownStages(await getAppConfig());
 
   return (
     <section className="relative overflow-hidden">
@@ -73,14 +66,8 @@ export default async function Hero() {
             />
           </div>
 
-          {/* Renders nothing until the last few slots, so the hero is not
-              permanently shouting about numbers. */}
-          <SlotsRemaining capacity={capacity} className="mb-6 max-w-xl" />
-
+          {/* Registration has closed, so the Discord is the way in. */}
           <div className="flex flex-wrap items-center gap-4">
-            <Link href={Path[2026].SignUp} className="button">
-              Register your team
-            </Link>
             <a
               href={DISCORD_INVITE}
               target="_blank"

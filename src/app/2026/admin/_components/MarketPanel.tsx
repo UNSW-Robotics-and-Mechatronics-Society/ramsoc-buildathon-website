@@ -113,7 +113,7 @@ export default function MarketPanel({
 
   const byClass = (cls: TicketClass) =>
     tickets.filter((t) => t.class === cls).length;
-  const dealers = new Set(messages.map((m) => m.profile_id).filter(Boolean));
+  const dealers = new Set(messages.map((m) => m.clerk_user_id).filter(Boolean));
 
   return (
     <div className="flex flex-col gap-6">
@@ -138,7 +138,14 @@ export default function MarketPanel({
 
       {/* ── messages ── */}
       <section className="flex flex-col gap-3">
-        <h2 className="font-display text-xl">Messages</h2>
+        <div>
+          <h2 className="font-display text-xl">Messages</h2>
+          <p className="font-main text-ink-dim mt-1 text-sm">
+            Nothing here is kept: any message, deleted ones included, is
+            hard-purged 3 hours after it was sent. This list only ever shows
+            what is still in the database right now.
+          </p>
+        </div>
         <div className="flex flex-wrap items-end gap-3">
           <SearchField
             label="Search"
@@ -211,7 +218,7 @@ export default function MarketPanel({
                     )}
                   </td>
                   <td className="px-3 py-2.5">
-                    {m.profile_id ? (
+                    {m.registered ? (
                       <>
                         <p className="font-main text-ink text-sm">
                           {m.full_name ?? "-"}
@@ -220,6 +227,8 @@ export default function MarketPanel({
                           {m.email}
                         </p>
                       </>
+                    ) : m.clerk_user_id ? (
+                      <StatusPill tone="neutral">Not registered</StatusPill>
                     ) : (
                       <span className="text-ink-dim text-sm">-</span>
                     )}
@@ -245,13 +254,13 @@ export default function MarketPanel({
                             }
                           />
                         )}
-                        {m.profile_id && (
+                        {m.clerk_user_id && (
                           <ActionButton
                             tone={m.muted ? "primary" : "neutral"}
                             disabled={isPending}
                             onClick={() =>
                               handleAction(() =>
-                                adminSetMarketMuted(m.profile_id!, !m.muted),
+                                adminSetMarketMuted(m.clerk_user_id!, !m.muted),
                               )
                             }
                           >

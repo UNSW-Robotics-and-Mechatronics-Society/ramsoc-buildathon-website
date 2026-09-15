@@ -1,22 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { motion } from "motion/react";
 import { useEgg } from "@/app/2026/_components/eggs/EggProvider";
 import { Button } from "@/app/2026/_components/ui/Button";
 
 /**
  * Rambo, RAMSoc's mascot: a blueprint-blue robo-ram with beige horns and an
- * antenna. The artwork is /2026/brand/rambo.png; if it is missing the page
- * still stands up with a brick silhouette in his colours, so a deploy is
- * never broken by an asset.
+ * antenna. The artwork lives at /2026/brand/rambo.png.
  */
 
-const RAMBO_SRC = "/2026/brand/rambo.png";
-
-/** Mascot palette, sampled from the artwork. */
+/** Mascot palette, sampled from the artwork. Used for the background bricks. */
 const RAMBO_BLUE = "#2f5c8a";
-const RAMBO_NAVY = "#1e3f66";
 const RAMBO_HORN = "#e8d3a5";
 
 const LINES = [
@@ -27,55 +23,9 @@ const LINES = [
   "Tell nobody. Take the ticket.",
 ];
 
-/** Fallback: Rambo in bricks. Close enough to be him, not close enough to fool anyone. */
-function BrickRambo() {
-  return (
-    <svg viewBox="0 0 160 180" className="h-full w-full" aria-hidden>
-      {/* Antenna */}
-      <rect x="77" y="4" width="6" height="26" rx="3" fill={RAMBO_NAVY} />
-      <circle cx="80" cy="6" r="6" fill={RAMBO_NAVY} />
-      {/* Horns */}
-      <path
-        d="M22 70 C 2 60, 4 28, 30 26 C 52 24, 58 48, 44 58 C 36 64, 26 60, 28 50"
-        fill={RAMBO_HORN}
-        stroke="#d8c08c"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M138 70 C 158 60, 156 28, 130 26 C 108 24, 102 48, 116 58 C 124 64, 134 60, 132 50"
-        fill={RAMBO_HORN}
-        stroke="#d8c08c"
-        strokeWidth="4"
-        strokeLinejoin="round"
-      />
-      {/* Head, a cloud of wool */}
-      <path
-        d="M40 60 C 30 40, 60 26, 80 34 C 100 26, 130 40, 120 60 C 138 66, 134 96, 116 98 L 44 98 C 26 96, 22 66, 40 60 Z"
-        fill={RAMBO_BLUE}
-        stroke={RAMBO_NAVY}
-        strokeWidth="5"
-        strokeLinejoin="round"
-      />
-      {/* Face plate */}
-      <rect x="50" y="58" width="60" height="34" rx="14" fill="#f4f7fb" stroke={RAMBO_NAVY} strokeWidth="4" />
-      <rect x="62" y="68" width="8" height="12" rx="2" fill={RAMBO_NAVY} />
-      <rect x="90" y="68" width="8" height="12" rx="2" fill={RAMBO_NAVY} />
-      <path d="M74 82 Q80 88 86 82" stroke={RAMBO_NAVY} strokeWidth="3" fill="none" strokeLinecap="round" />
-      {/* Body */}
-      <rect x="48" y="100" width="64" height="52" rx="18" fill="#f4f7fb" stroke={RAMBO_NAVY} strokeWidth="5" />
-      <path d="M48 118 Q80 130 112 118 L112 134 Q80 146 48 134 Z" fill={RAMBO_BLUE} />
-      {/* Feet */}
-      <rect x="46" y="150" width="28" height="18" rx="8" fill={RAMBO_BLUE} stroke={RAMBO_NAVY} strokeWidth="4" />
-      <rect x="86" y="150" width="28" height="18" rx="8" fill={RAMBO_BLUE} stroke={RAMBO_NAVY} strokeWidth="4" />
-    </svg>
-  );
-}
-
 export default function RamboStage() {
   const egg = useEgg();
   const opened = useRef(false);
-  const [missing, setMissing] = useState(false);
   const [line, setLine] = useState(0);
 
   useEffect(() => {
@@ -139,17 +89,13 @@ export default function RamboStage() {
         transition={{ duration: 3.2, repeat: Infinity, ease: "easeInOut" }}
         className="relative h-64 w-56 sm:h-80 sm:w-72"
       >
-        {missing ? (
-          <BrickRambo />
-        ) : (
-          // eslint-disable-next-line @next/next/no-img-element -- falls back on error, which next/image cannot do
-          <img
-            src={RAMBO_SRC}
-            alt="Rambo, RAMSoc's mascot: a blue robotic ram with beige horns and an antenna"
-            className="h-full w-full object-contain drop-shadow-[0_12px_0_rgba(0,0,0,0.25)]"
-            onError={() => setMissing(true)}
-          />
-        )}
+        <Image
+          src="/2026/brand/rambo.png"
+          alt="Rambo, RAMSoc's mascot: a blue robotic ram with beige horns and an antenna"
+          fill
+          sizes="(max-width: 640px) 14rem, 18rem"
+          className="object-contain drop-shadow-[0_12px_0_rgba(0,0,0,0.25)]"
+        />
         <motion.span
           aria-hidden
           animate={{ opacity: [0.2, 1, 0.2], scale: [0.8, 1.3, 0.8] }}

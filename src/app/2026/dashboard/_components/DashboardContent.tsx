@@ -14,7 +14,6 @@ import type { UserTask } from "@/app/2026/_actions/tasks";
 import type { Ticket } from "@/app/_types/market";
 import Card from "@/app/2026/_components/ui/Card";
 import Badge from "@/app/2026/_components/ui/Badge";
-import SlotsRemaining from "@/app/2026/_components/SlotsRemaining";
 import { completeTask } from "@/app/2026/_actions/tasks";
 import TeamCard from "./TeamCard";
 import MemberList from "./MemberList";
@@ -361,11 +360,6 @@ export default function DashboardContent({
 
   return (
     <>
-      {/* Slots left, above the tabs so it is on every section of the portal.
-          A team that has already paid holds its slot, so the notice would be
-          nothing but noise for them. */}
-      {!isPaid && <SlotsRemaining capacity={capacity} className="mb-5" />}
-
       <TabStrip tab={tab} setTab={setTab} />
 
       <AnimatePresence mode="wait">
