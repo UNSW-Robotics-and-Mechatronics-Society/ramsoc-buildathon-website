@@ -26,9 +26,8 @@ function signFor(access: Shut): {
     case "signed-out":
       return {
         title: "No name, no entry.",
-        body: "The doorman needs to know who you are. Sign in to get past the door.",
+        body: "The doorman needs to know who you are. Sign in with your Buildathon account to get past the door.",
         cta: { label: "Sign in", href: backHere },
-        secondary: { label: "Create an account", href: Path[2026].SignUp },
       };
     case "closed":
       return {

@@ -13,13 +13,13 @@ const HOLD_FULL_MS = 1700;
 const HOLD_EMPTY_MS = 350;
 
 /**
- * Roughly one cycle in fifty, the typewriter slips and types this instead of
- * a build idea. It holds a good while longer than the others, and while it
- * is on screen it is a button. Whoever is watching closely enough to catch
- * it, and click it, gets a ticket.
+ * Every so often the typewriter slips and types this instead of a build idea.
+ * It holds a good while longer than the others, and while it is on screen it
+ * is a button. Whoever is watching closely enough to catch it, and click it,
+ * gets a ticket.
  */
 const SLIP = "a black market";
-const SLIP_ODDS = 1 / 50;
+const SLIP_ODDS = 1 / 10;
 const HOLD_SLIP_MS = 4500;
 
 /**

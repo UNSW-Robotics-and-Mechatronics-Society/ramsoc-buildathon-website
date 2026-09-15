@@ -17,9 +17,14 @@ export default function SignInPage() {
           Back to Buildathon
         </Link>
       </div>
+      {/*
+        Registration is closed and the sign-up route is gone, so the card's
+        "don't have an account?" footer is hidden rather than left pointing at
+        a page that no longer exists.
+      */}
       <SignIn
-        signUpUrl={Path[2026].SignUp}
         fallbackRedirectUrl={Path[2026].Onboarding}
+        appearance={{ elements: { footerAction: "hidden" } }}
       />
     </div>
   );
