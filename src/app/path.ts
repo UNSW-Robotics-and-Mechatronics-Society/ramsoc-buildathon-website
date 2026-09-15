@@ -9,8 +9,9 @@ const Path = {
     Sponsors: "/2026/#sponsors",
     Support: "/2026/#support",
 
+    // No SignUp route: registration is closed for 2026, so accounts are not
+    // created from the site any more. Existing accounts sign in as normal.
     SignIn: "/2026/sign-in",
-    SignUp: "/2026/sign-up",
     Onboarding: "/2026/onboarding",
     Dashboard: "/2026/dashboard",
     Payment: "/2026/dashboard/payment",
