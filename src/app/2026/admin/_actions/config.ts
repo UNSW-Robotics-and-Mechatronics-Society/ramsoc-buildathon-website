@@ -1,8 +1,10 @@
 "use server";
 
+import { revalidatePath } from "next/cache";
 import { getSupabaseSecretClient } from "@/app/_utils/supabase";
 import { COMPETITION_YEAR } from "@/app/2026/_data/teamConfig";
 import { assertAdmin } from "@/app/2026/admin/_utils/adminAuth";
+import Path from "@/app/path";
 import type { AdminAppConfig } from "@/app/2026/admin/_utils/types";
 
 const COLUMNS =
@@ -111,5 +113,9 @@ export async function updateRegistrationDates(dates: {
     .eq("competition_year", COMPETITION_YEAR);
 
   if (error) return { success: false, error: error.message };
+
+  // The homepage is cached, so the hero countdown would otherwise keep showing
+  // the old dates until the window lapsed.
+  revalidatePath(Path[2026].Root);
   return { success: true };
 }

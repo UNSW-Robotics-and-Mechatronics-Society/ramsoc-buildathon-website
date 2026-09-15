@@ -3,6 +3,16 @@ export type Faq = {
   answer: string;
 };
 
+/**
+ * Not in the list. Rendered only once every question in FAQS has been opened
+ * at least once, and opening it is an easter egg.
+ */
+export const HIDDEN_FAQ: Faq = {
+  question: "What is the Black Market?",
+  answer:
+    "Officially, nothing. Unofficially: a back room on this site where the bonus component-shop tickets hidden around the place change hands. You opened every question on this page to get here, which is exactly the sort of person it was built for.",
+};
+
 export const FAQS: Faq[] = [
   {
     question: "What is Buildathon?",

@@ -27,6 +27,8 @@ export type MarketMessage = {
   /** Null for system notices. */
   author: MarketIdentity | null;
   mine: boolean;
+  /** Client-only: shown the instant it is sent, before the server confirms. */
+  pending?: boolean;
 };
 
 export type MarketDealer = MarketIdentity & {
@@ -38,7 +40,8 @@ export type MarketDealer = MarketIdentity & {
 export type MarketPoll = {
   messages: MarketMessage[];
   deletedIds: string[];
-  dealers: MarketDealer[];
+  /** Only refreshed on heartbeat polls; undefined means "unchanged". */
+  dealers?: MarketDealer[];
   open: boolean;
   /** Server clock at the time of the poll, echoed back as `since`. */
   now: string;

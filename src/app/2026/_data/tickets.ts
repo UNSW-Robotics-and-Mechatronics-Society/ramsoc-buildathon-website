@@ -37,6 +37,26 @@ export const EGGS = {
     title: "Six seven",
     blurb: "Six... seven. You know what you did.",
   },
+  typeRambo: {
+    class: "C",
+    title: "Said his name",
+    blurb: "You typed it. He heard.",
+  },
+  faq17: {
+    class: "C",
+    title: "The seventeenth question",
+    blurb: "You opened every single FAQ. Nobody does that.",
+  },
+  typewriter: {
+    class: "B",
+    title: "Read the fine print",
+    blurb: "One in fifty. You caught the typewriter slipping.",
+  },
+  cornerRambo: {
+    class: "B",
+    title: "Caught him",
+    blurb: "He was only half in the room. You grabbed him anyway.",
+  },
 } as const satisfies Record<
   string,
   { class: TicketClass; title: string; blurb: string }

@@ -45,7 +45,7 @@ function signFor(access: Shut): {
     case "error":
       return {
         title: "The lights are out.",
-        body: "Something's wrong on our end, not a deliberate close. Try again shortly, or tell an organiser if it keeps happening.",
+        body: "Something's wrong on our end, try again shortly, or tell an organiser if it keeps happening.",
         cta: { label: "Back to Buildathon", href: Path[2026].Root },
       };
   }
@@ -56,7 +56,10 @@ export default function LockedDoor({ access }: { access: Shut }) {
 
   return (
     <section className="market-wall relative flex min-h-[calc(100vh-8rem)] items-center justify-center overflow-hidden px-4 py-16">
-      <div className="flex w-full max-w-md flex-col items-center text-center">
+      <div aria-hidden className="market-lamp-glow market-lamp pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-grain pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-vignette pointer-events-none absolute inset-0" />
+      <div className="relative flex w-full max-w-md flex-col items-center text-center">
         <p className="font-blueprint text-[#d9a441] mb-6 text-xs uppercase">
           Back of the makerspace · Knock twice
         </p>

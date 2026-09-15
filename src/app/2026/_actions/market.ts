@@ -31,15 +31,14 @@ type SupabaseClient = ReturnType<typeof getSupabaseSecretClient>;
 /**
  * A dealer, keyed by their Clerk account rather than a Buildathon profile: the
  * market is open to anyone signed in, registered or not. `profileId` is
- * filled in whenever the account has gone through onboarding, kept fresh on
- * every visit, it is what lets a dealer hold and trade tickets.
+ * filled in whenever the account has gone through onboarding, it is what lets
+ * a dealer hold and trade tickets.
  */
 type Member = {
   clerkUserId: string;
   profileId: string | null;
   alias: string | null;
   avatarSeed: number | null;
-  muted: boolean;
 };
 
 /** Why someone can or cannot be in the market right now. */
@@ -52,48 +51,81 @@ export type MarketAccess =
 const MESSAGE_SELECT =
   "id, seq, kind, body, created_at, author_id, author:market_identities(alias, avatar_seed)";
 
-// ── access ───────────────────────────────────────────────────────────────────
+/** Presence lists are capped: past this, "who is around" is a crowd, not a list. */
+const DEALER_LIST_MAX = 200;
+
+// ── load shedding ────────────────────────────────────────────────────────────
+//
+// Every open client polls every few seconds. With a few hundred people in the
+// room that is a steady hundred-odd requests a second, so the per-poll cost
+// is what decides whether the database stays upright. Two things are cached
+// per server instance:
+//
+//  - whether the market is open, which changes about once a term, and
+//  - when the expiry sweep last ran, so hundreds of clients on a heartbeat
+//    do not each issue the same DELETE.
+//
+// Serverless instances each keep their own copy; that is fine, both values
+// tolerate being a few seconds stale.
+
+const OPEN_CACHE_MS = 10_000;
+let openCache: { value: boolean; at: number } | null = null;
+
+const PURGE_EVERY_MS = 60_000;
+let lastPurgeAt = 0;
 
 async function isMarketOpen(supabase: SupabaseClient): Promise<boolean> {
+  if (openCache && Date.now() - openCache.at < OPEN_CACHE_MS) {
+    return openCache.value;
+  }
   const { data } = await supabase
     .from("app_config")
     .select("market_open")
     .eq("competition_year", COMPETITION_YEAR)
     .maybeSingle();
-  return (data?.market_open as boolean | undefined) ?? true;
+  const value = (data?.market_open as boolean | undefined) ?? true;
+  openCache = { value, at: Date.now() };
+  return value;
 }
 
 /**
  * Hard-delete anything older than MARKET_MESSAGE_TTL_MS, moderation records
- * included. There is no scheduled job behind this, it runs opportunistically
- * on read (see call sites below). Returns the purged ids so a live poll can
- * tell already-open clients to drop them, the same way a moderator's delete
- * does.
+ * included. Runs opportunistically on read, at most once a minute per
+ * instance. Clients drop expired messages themselves by timestamp, so this
+ * does not need to report what it removed.
  */
-async function purgeOldMessages(supabase: SupabaseClient): Promise<string[]> {
+async function purgeOldMessages(supabase: SupabaseClient): Promise<void> {
+  if (Date.now() - lastPurgeAt < PURGE_EVERY_MS) return;
+  lastPurgeAt = Date.now();
+
   const cutoff = new Date(Date.now() - MARKET_MESSAGE_TTL_MS).toISOString();
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from("market_messages")
     .delete()
-    .lt("created_at", cutoff)
-    .select("id");
+    .lt("created_at", cutoff);
 
   if (error) {
-    // Never let housekeeping take the room down. It catches up next visit.
+    // Never let housekeeping take the room down. It catches up next minute.
     await logError("market.purge", "Failed to purge old messages", {
       error: error.message,
     });
-    return [];
   }
-  return (data ?? []).map((d) => d.id as string);
 }
+
+// ── access ───────────────────────────────────────────────────────────────────
 
 /**
  * The full gate: signed in, market open, not muted. Nothing else. Whether a
  * Buildathon profile exists only changes what the dealer can do once inside
  * (namely, hold tickets), it never blocks the door.
+ *
+ * `withProfile` does a live lookup of the profile; the light path trusts the
+ * copy stored on the identity (refreshed on every entry), which is all a poll
+ * or a chat message needs.
  */
-async function resolveAccess(): Promise<{
+async function resolveAccess(
+  opts: { withProfile?: boolean } = {},
+): Promise<{
   access: MarketAccess;
   member?: Member;
   supabase: SupabaseClient;
@@ -103,32 +135,36 @@ async function resolveAccess(): Promise<{
   const { userId } = await auth();
   if (!userId) return { access: { state: "signed-out" }, supabase };
 
-  const [{ data: identity }, { data: profile }] = await Promise.all([
+  const [{ data: identity }, profile, open] = await Promise.all([
     supabase
       .from("market_identities")
-      .select("alias, avatar_seed, muted")
+      .select("alias, avatar_seed, muted, profile_id")
       .eq("clerk_user_id", userId)
       .maybeSingle(),
-    supabase
-      .from("profiles")
-      .select("id")
-      .eq("clerk_user_id", userId)
-      .maybeSingle(),
+    opts.withProfile
+      ? supabase
+          .from("profiles")
+          .select("id")
+          .eq("clerk_user_id", userId)
+          .maybeSingle()
+      : Promise.resolve({ data: null as { id: string } | null }),
+    isMarketOpen(supabase),
   ]);
 
   if (identity?.muted) return { access: { state: "muted" }, supabase };
-  if (!(await isMarketOpen(supabase))) {
-    return { access: { state: "closed" }, supabase };
-  }
+  if (!open) return { access: { state: "closed" }, supabase };
+
+  const profileId = opts.withProfile
+    ? ((profile.data?.id as string | undefined) ?? null)
+    : ((identity?.profile_id as string | null | undefined) ?? null);
 
   return {
     access: { state: "ok" },
     member: {
       clerkUserId: userId,
-      profileId: (profile?.id as string | undefined) ?? null,
+      profileId,
       alias: (identity?.alias as string | undefined) ?? null,
       avatarSeed: (identity?.avatar_seed as number | undefined) ?? null,
-      muted: false,
     },
     supabase,
   };
@@ -137,29 +173,37 @@ async function resolveAccess(): Promise<{
 // ── identity ─────────────────────────────────────────────────────────────────
 
 /**
- * Assign a dealer name and avatar the first time someone walks in, and keep
- * `profile_id` fresh so a dealer who registers after their first visit can
- * hold tickets from then on. The alias column is unique, a collision just
- * rolls again; after a few tries a numeric suffix makes the space effectively
+ * The dealer name and avatar, assigned the first time someone walks in and
+ * read-only after that. The alias column is unique, a collision just rolls
+ * again; after a few tries a numeric suffix makes the space effectively
  * unbounded.
  */
 async function ensureIdentity(
   supabase: SupabaseClient,
   member: Member,
 ): Promise<MarketIdentity> {
-  const now = new Date().toISOString();
-
   if (member.alias && member.avatarSeed != null) {
-    await supabase
-      .from("market_identities")
-      .update({ profile_id: member.profileId, last_seen: now })
-      .eq("clerk_user_id", member.clerkUserId);
     return { alias: member.alias, avatarSeed: member.avatarSeed };
   }
 
+  const now = new Date().toISOString();
   const seed = crypto.getRandomValues(new Uint32Array(1))[0];
 
-  for (let attempt = 0; attempt < 8; attempt++) {
+  const existing = async (): Promise<MarketIdentity | null> => {
+    const { data } = await supabase
+      .from("market_identities")
+      .select("alias, avatar_seed")
+      .eq("clerk_user_id", member.clerkUserId)
+      .maybeSingle();
+    return data?.alias
+      ? {
+          alias: data.alias as string,
+          avatarSeed: (data.avatar_seed as number | null) ?? seed,
+        }
+      : null;
+  };
+
+  for (let attempt = 0; attempt < 6; attempt++) {
     const { adjective, noun } = randomAliasParts();
     const suffix =
       attempt < 3 ? "" : ` #${10 + Math.floor(Math.random() * 90)}`;
@@ -175,8 +219,7 @@ async function ensureIdentity(
     });
 
     if (!error) return { alias, avatarSeed: seed };
-    // 23505 on clerk_user_id means a second tab won the race; on alias it
-    // means try again with a different name.
+
     if (error.code !== "23505") {
       await logError("market.identity", "Failed to assign alias", {
         clerkUserId: member.clerkUserId,
@@ -184,22 +227,18 @@ async function ensureIdentity(
       });
       throw new Error("Could not get you a dealer name. Try again.");
     }
+
+    // A unique violation is either a second tab that already made this
+    // dealer, or two people landing on the same random name. Check which,
+    // rather than burning every attempt rolling names against a row that
+    // already exists.
+    const mine = await existing();
+    if (mine) return mine;
   }
 
-  // Re-read rather than trust the loop: a second tab may have won the race.
-  const { data } = await supabase
-    .from("market_identities")
-    .select("alias, avatar_seed")
-    .eq("clerk_user_id", member.clerkUserId)
-    .single();
-
-  if (!data?.alias) {
-    throw new Error("Could not get you a dealer name. Try again.");
-  }
-  return {
-    alias: data.alias as string,
-    avatarSeed: (data.avatar_seed as number | null) ?? seed,
-  };
+  const mine = await existing();
+  if (!mine) throw new Error("Could not get you a dealer name. Try again.");
+  return mine;
 }
 
 // ── reads ────────────────────────────────────────────────────────────────────
@@ -240,7 +279,8 @@ async function getDealers(supabase: SupabaseClient): Promise<MarketDealer[]> {
     .select("alias, avatar_seed")
     .eq("muted", false)
     .gte("last_seen", cutoff)
-    .order("alias");
+    .order("alias")
+    .limit(DEALER_LIST_MAX);
 
   return (data ?? []).map((d) => ({
     alias: d.alias as string,
@@ -272,32 +312,39 @@ export type MarketRoom = {
 };
 
 /**
- * Walk in. Assigns an identity if this is the first visit, then returns the
- * recent history and who else is around. The page calls this on the server;
- * the client keeps up with `pollMarket` from there.
+ * Walk in. Assigns an identity if this is the first visit, refreshes the
+ * profile link so someone who registered since last time can now hold
+ * tickets, then returns the recent history and who else is around. The page
+ * calls this on the server; the client keeps up with `pollMarket` from there.
  */
 export async function enterMarket(): Promise<
   { access: Exclude<MarketAccess, { state: "ok" }> } | { access: { state: "ok" }; room: MarketRoom }
 > {
-  const { access, member, supabase } = await resolveAccess();
+  const { access, member, supabase } = await resolveAccess({
+    withProfile: true,
+  });
   if (access.state !== "ok" || !member) {
     return { access: access as Exclude<MarketAccess, { state: "ok" }> };
   }
 
-  // Sweep before reading, so a fresh arrival never sees expired history.
-  await purgeOldMessages(supabase);
-
   const identity = await ensureIdentity(supabase, member);
+  const now = new Date().toISOString();
 
   const [{ data: rows }, dealers, tickets] = await Promise.all([
     supabase
       .from("market_messages")
       .select(MESSAGE_SELECT)
       .is("deleted_at", null)
+      .gte("created_at", new Date(Date.now() - MARKET_MESSAGE_TTL_MS).toISOString())
       .order("seq", { ascending: false })
       .limit(MARKET_HISTORY),
     getDealers(supabase),
     getHolderTickets(supabase, member.profileId),
+    supabase
+      .from("market_identities")
+      .update({ profile_id: member.profileId, last_seen: now })
+      .eq("clerk_user_id", member.clerkUserId),
+    purgeOldMessages(supabase),
   ]);
 
   const messages = ((rows ?? []) as MessageRow[])
@@ -312,15 +359,16 @@ export async function enterMarket(): Promise<
       dealers,
       tickets,
       registered: member.profileId !== null,
-      now: new Date().toISOString(),
+      now,
     },
   };
 }
 
 /**
  * Everything since the client's cursor: new messages by `seq`, moderated
- * messages by `deleted_at`, and who is around. `heartbeat` marks the caller
- * present; the client sends it every few polls rather than every one.
+ * messages by `deleted_at`. On heartbeat polls only (every few ticks) it also
+ * marks the caller present, refreshes who is around, and runs the expiry
+ * sweep, the three things that cost more than a plain select.
  */
 export async function pollMarket(input: {
   afterSeq: number;
@@ -333,7 +381,6 @@ export async function pollMarket(input: {
     return {
       messages: [],
       deletedIds: [],
-      dealers: [],
       open: false,
       reason: access.state,
       now,
@@ -341,38 +388,37 @@ export async function pollMarket(input: {
   }
 
   const since = Number.isNaN(Date.parse(input.since)) ? now : input.since;
-
-  // Swept on the heartbeat cadence (~every 8th poll) rather than every 3s
-  // tick, a hard delete is heavier than a plain select and there is no need
-  // to run it that often for a 3-hour window.
-  const purgedIds = input.heartbeat ? await purgeOldMessages(supabase) : [];
+  const afterSeq = Number.isFinite(input.afterSeq)
+    ? Math.max(0, Math.floor(input.afterSeq))
+    : 0;
 
   const [{ data: rows }, { data: deleted }, dealers] = await Promise.all([
     supabase
       .from("market_messages")
       .select(MESSAGE_SELECT)
       .is("deleted_at", null)
-      .gt("seq", Math.max(0, Math.floor(input.afterSeq)))
+      .gt("seq", afterSeq)
       .order("seq", { ascending: true })
       .limit(MARKET_HISTORY),
     supabase
       .from("market_messages")
       .select("id")
       .gte("deleted_at", since),
-    getDealers(supabase),
+    input.heartbeat ? getDealers(supabase) : Promise.resolve(undefined),
     input.heartbeat
       ? supabase
           .from("market_identities")
           .update({ last_seen: now })
           .eq("clerk_user_id", member.clerkUserId)
       : Promise.resolve(),
+    input.heartbeat ? purgeOldMessages(supabase) : Promise.resolve(),
   ]);
 
   return {
     messages: ((rows ?? []) as MessageRow[]).map((r) =>
       toMessage(r, member.clerkUserId),
     ),
-    deletedIds: [...(deleted ?? []).map((d) => d.id as string), ...purgedIds],
+    deletedIds: (deleted ?? []).map((d) => d.id as string),
     dealers,
     open: true,
     now,
@@ -439,11 +485,6 @@ export async function sendMarketMessage(
     return { success: false, error: "That did not go through. Try again." };
   }
 
-  await supabase
-    .from("market_identities")
-    .update({ last_seen: data.created_at })
-    .eq("clerk_user_id", member.clerkUserId);
-
   return {
     success: true,
     message: {
@@ -472,7 +513,9 @@ export async function handOverTicket(
 ): Promise<
   { success: true; tickets: Ticket[] } | { success: false; error: string }
 > {
-  const { access, member, supabase } = await resolveAccess();
+  const { access, member, supabase } = await resolveAccess({
+    withProfile: true,
+  });
   if (access.state !== "ok" || !member) {
     return { success: false, error: "You are not in the market." };
   }

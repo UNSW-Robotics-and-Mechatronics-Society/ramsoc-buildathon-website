@@ -7,8 +7,13 @@
 
 export const MARKET_MESSAGE_MAX = 500;
 
-/** Minimum gap between two messages from one person. */
-export const MARKET_RATE_LIMIT_MS = 1500;
+/**
+ * Minimum gap between two messages from one person. Sends are optimistic, so
+ * a message that trips this is pulled back out of the room after it appeared,
+ * which is jarring: the limit is set to stop flooding, not to pace a fast
+ * typist mid-haggle.
+ */
+export const MARKET_RATE_LIMIT_MS = 800;
 
 /** How often an open client asks for new messages. */
 export const MARKET_POLL_MS = 3000;

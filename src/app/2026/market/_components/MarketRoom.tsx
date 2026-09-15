@@ -23,6 +23,7 @@ import {
 } from "@/app/2026/_actions/market";
 import {
   MARKET_MESSAGE_MAX,
+  MARKET_MESSAGE_TTL_MS,
   MARKET_POLL_MS,
 } from "@/app/2026/_data/market";
 import { TICKET_CLASSES } from "@/app/2026/_data/tickets";
@@ -35,6 +36,13 @@ import Path from "@/app/path";
 /** Polls between presence heartbeats. Presence only needs to be roughly right. */
 const HEARTBEAT_EVERY = 8;
 
+/**
+ * Most messages kept in the DOM. The room turns over fast on a busy night;
+ * past this, old messages are dropped from the top rather than growing the
+ * list forever in a tab that has been open all evening.
+ */
+const CLIENT_HISTORY_MAX = 300;
+
 const TIME = new Intl.DateTimeFormat("en-AU", {
   hour: "numeric",
   minute: "2-digit",
@@ -45,6 +53,18 @@ const SHUT_COPY: Record<Exclude<MarketAccess["state"], "ok">, string> = {
   closed: "Management closed the market.",
   muted: "You've been asked to leave.",
 };
+
+/** Keep the newest N, in seq order, dropping anything past its expiry. */
+function trim(list: MarketMessage[]): MarketMessage[] {
+  const cutoff = Date.now() - MARKET_MESSAGE_TTL_MS;
+  const live = list.filter(
+    (m) => m.pending || Date.parse(m.created_at) >= cutoff,
+  );
+  live.sort((a, b) => a.seq - b.seq);
+  return live.length > CLIENT_HISTORY_MAX
+    ? live.slice(live.length - CLIENT_HISTORY_MAX)
+    : live;
+}
 
 // ── pieces ───────────────────────────────────────────────────────────────────
 
@@ -62,7 +82,13 @@ function Message({ m }: { m: MarketMessage }) {
   const offer = m.kind === "offer";
 
   return (
-    <li className={cn("flex gap-2.5 px-2", m.mine && "flex-row-reverse")}>
+    <li
+      className={cn(
+        "flex gap-2.5 px-2 transition-opacity",
+        m.mine && "flex-row-reverse",
+        m.pending && "opacity-55",
+      )}
+    >
       <LegoAvatar seed={m.author.avatarSeed} className="mt-5 h-9 w-9" />
       <div className={cn("flex max-w-[78%] flex-col", m.mine && "items-end")}>
         <p className="font-blueprint mb-1 flex items-baseline gap-2 text-[0.65rem] uppercase">
@@ -70,7 +96,7 @@ function Message({ m }: { m: MarketMessage }) {
             {m.mine ? "You" : m.author.alias}
           </span>
           <time dateTime={m.created_at} className="text-ink-dim/70">
-            {TIME.format(new Date(m.created_at))}
+            {m.pending ? "sending" : TIME.format(new Date(m.created_at))}
           </time>
         </p>
         <div
@@ -80,7 +106,7 @@ function Message({ m }: { m: MarketMessage }) {
               ? "border-lego-yellow/60 bg-lego-yellow/10 text-ink border"
               : m.mine
                 ? "bg-[#1b3a66] text-ink"
-                : "text-ink border border-white/10 bg-white/6",
+                : "text-ink border border-white/8 bg-[#0c1526]/80",
           )}
         >
           {offer && (
@@ -125,12 +151,20 @@ function Wallet({
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="relative flex flex-col gap-3">
+      {/* Stamped on the wall above the counter. */}
+      <span
+        aria-hidden
+        className="font-display pointer-events-none absolute -top-1 right-0 -rotate-12 rounded-sm border-2 border-[#b23a3a]/55 px-2 py-0.5 text-xs font-bold tracking-[0.2em] text-[#b23a3a]/70 uppercase"
+      >
+        No refunds
+      </span>
+
       <div className="flex items-baseline justify-between">
         <p className="font-blueprint text-[#d9a441] text-xs uppercase">
           Your pockets
         </p>
-        <span className="font-blueprint text-ink-dim text-xs">
+        <span className="font-blueprint text-ink-dim mr-24 text-xs">
           {tickets.length} ticket{tickets.length === 1 ? "" : "s"}
         </span>
       </div>
@@ -229,17 +263,31 @@ function Wallet({
   );
 }
 
+/** The dark room's dressing: grain, a vignette, and one buzzing lamp. */
+function Atmosphere() {
+  return (
+    <>
+      <div aria-hidden className="market-lamp-glow market-lamp pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-grain pointer-events-none absolute inset-0" />
+      <div aria-hidden className="market-vignette pointer-events-none absolute inset-0" />
+    </>
+  );
+}
+
 // ── room ─────────────────────────────────────────────────────────────────────
 
 export default function MarketRoom({ initial }: { initial: Room }) {
-  const [messages, setMessages] = useState<MarketMessage[]>(initial.messages);
+  const [messages, setMessages] = useState<MarketMessage[]>(() =>
+    trim(initial.messages),
+  );
   const [dealers, setDealers] = useState<MarketDealer[]>(initial.dealers);
   const [tickets, setTickets] = useState<Ticket[]>(initial.tickets);
   const [shut, setShut] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [asOffer, setAsOffer] = useState(false);
   const [sendError, setSendError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
+  const [, startSend] = useTransition();
+  const [handing, startHandOver] = useTransition();
   const [panel, setPanel] = useState<"chat" | "wallet">("chat");
 
   const cursor = useRef({
@@ -249,19 +297,26 @@ export default function MarketRoom({ initial }: { initial: Room }) {
   const pollCount = useRef(0);
   const listRef = useRef<HTMLUListElement>(null);
   const stickToBottom = useRef(true);
+  const pendingSeq = useRef(0);
 
   const merge = useCallback(
     (incoming: MarketMessage[], deletedIds: string[]) => {
-      if (incoming.length === 0 && deletedIds.length === 0) return;
       setMessages((current) => {
         const seen = new Set(current.map((m) => m.id));
         const gone = new Set(deletedIds);
-        const next = current.filter((m) => !gone.has(m.id));
+        // A message of mine can arrive from a poll before its own send call
+        // returns. Drop the optimistic copy rather than showing both.
+        const settled = new Set(
+          incoming.filter((m) => m.mine).map((m) => m.body),
+        );
+        const next = current.filter(
+          (m) =>
+            !gone.has(m.id) && !(m.pending && settled.has(m.body)),
+        );
         for (const m of incoming) {
           if (!seen.has(m.id) && !gone.has(m.id)) next.push(m);
         }
-        next.sort((a, b) => a.seq - b.seq);
-        return next;
+        return trim(next);
       });
       const top = incoming.reduce((m, x) => Math.max(m, x.seq), 0);
       if (top > cursor.current.afterSeq) cursor.current.afterSeq = top;
@@ -295,8 +350,10 @@ export default function MarketRoom({ initial }: { initial: Room }) {
           return;
         }
         cursor.current.since = result.now;
+        // Always merge, even when nothing arrived: it re-runs the expiry
+        // trim, so a tab left open drops 3-hour-old messages on its own.
         merge(result.messages, result.deletedIds);
-        setDealers(result.dealers);
+        if (result.dealers) setDealers(result.dealers);
       } catch {
         // Transient. The next tick tries again.
       } finally {
@@ -330,18 +387,45 @@ export default function MarketRoom({ initial }: { initial: Room }) {
       el.scrollHeight - el.scrollTop - el.clientHeight < 80;
   }
 
+  /**
+   * Optimistic: the message lands in the list and the box clears the instant
+   * Enter is pressed. The round trip runs behind it; if the server refuses,
+   * the bubble is pulled back out and the text put back for another go.
+   */
   function send() {
     const body = draft.trim();
-    if (!body || isPending) return;
+    if (!body) return;
+    const kind = asOffer ? "offer" : "chat";
+    const tempId = `pending-${++pendingSeq.current}`;
+
     setSendError(null);
-    startTransition(async () => {
-      const result = await sendMarketMessage(body, asOffer ? "offer" : "chat");
+    setDraft("");
+    setAsOffer(false);
+    stickToBottom.current = true;
+    setMessages((current) =>
+      trim([
+        ...current,
+        {
+          id: tempId,
+          seq: Number.MAX_SAFE_INTEGER,
+          kind,
+          body,
+          created_at: new Date().toISOString(),
+          author: initial.identity,
+          mine: true,
+          pending: true,
+        },
+      ]),
+    );
+
+    startSend(async () => {
+      const result = await sendMarketMessage(body, kind);
+      setMessages((current) => current.filter((m) => m.id !== tempId));
       if (result.success) {
-        setDraft("");
-        setAsOffer(false);
-        stickToBottom.current = true;
         merge([result.message], []);
       } else {
+        setDraft(body);
+        setAsOffer(kind === "offer");
         setSendError(result.error);
       }
     });
@@ -350,7 +434,7 @@ export default function MarketRoom({ initial }: { initial: Room }) {
   const handOver = useCallback(
     (ticketId: string, alias: string) =>
       new Promise<string | null>((resolve) => {
-        startTransition(async () => {
+        startHandOver(async () => {
           const result = await handOverTicket(ticketId, alias);
           if (result.success) {
             setTickets(result.tickets);
@@ -370,8 +454,9 @@ export default function MarketRoom({ initial }: { initial: Room }) {
 
   if (shut) {
     return (
-      <section className="market-wall flex min-h-[calc(100vh-8rem)] items-center justify-center px-4 py-16 text-center">
-        <div className="max-w-md">
+      <section className="market-wall relative flex min-h-[calc(100vh-8rem)] items-center justify-center overflow-hidden px-4 py-16 text-center">
+        <Atmosphere />
+        <div className="relative max-w-md">
           <p className="font-blueprint text-[#d9a441] text-xs uppercase">
             Shutters down
           </p>
@@ -388,32 +473,45 @@ export default function MarketRoom({ initial }: { initial: Room }) {
   }
 
   return (
-    <section className="market-wall min-h-[calc(100vh-8rem)] px-4 py-6 sm:px-6 sm:py-8">
-      <div className="mx-auto flex max-w-6xl flex-col gap-5">
+    <section className="market-wall relative min-h-[calc(100vh-8rem)] overflow-hidden px-4 py-6 sm:px-6 sm:py-8">
+      <Atmosphere />
+
+      <div className="relative mx-auto flex max-w-6xl flex-col gap-5">
         {/* Header: the sign, who is around, and who you are in here. */}
         <header className="flex flex-wrap items-end justify-between gap-4 border-b border-[#d9a441]/25 pb-4">
           <div>
             <p className="font-blueprint text-[#d9a441] text-xs uppercase">
-              Back of the makerspace · Cash or components
+              Back of the makerspace · Knock twice
             </p>
             <h1 className="font-stud text-ink market-flicker mt-1 lowercase">
               black <span className="text-[#d9a441]">market</span>
             </h1>
+            <p className="font-blueprint mt-2 text-[0.6rem] tracking-[0.3em] text-[#d9a441]/60 uppercase">
+              Cash · Components · No questions · No refunds
+            </p>
           </div>
 
-          <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
-            <LegoAvatar
-              seed={initial.identity.avatarSeed}
-              className="h-11 w-11"
-              title="Your dealer avatar"
-            />
-            <div className="min-w-0">
-              <p className="font-blueprint text-ink-dim text-[0.6rem] uppercase">
-                In here, you are
-              </p>
-              <p className="font-display text-ink truncate text-lg leading-tight font-bold uppercase">
-                {initial.identity.alias}
-              </p>
+          <div className="flex items-center gap-3">
+            <span
+              aria-hidden
+              className="market-neon font-display hidden rounded-sm border border-[#ff6a3d]/60 px-2.5 py-1 text-sm font-bold tracking-[0.25em] text-[#ff6a3d] uppercase sm:inline-block"
+            >
+              Open
+            </span>
+            <div className="flex items-center gap-3 rounded-lg border border-white/10 bg-black/40 px-3 py-2">
+              <LegoAvatar
+                seed={initial.identity.avatarSeed}
+                className="h-11 w-11"
+                title="Your dealer avatar"
+              />
+              <div className="min-w-0">
+                <p className="font-blueprint text-ink-dim text-[0.6rem] uppercase">
+                  In here, you are
+                </p>
+                <p className="font-display text-ink truncate text-lg leading-tight font-bold uppercase">
+                  {initial.identity.alias}
+                </p>
+              </div>
             </div>
           </div>
         </header>
@@ -442,26 +540,29 @@ export default function MarketRoom({ initial }: { initial: Room }) {
           {/* The room */}
           <div
             className={cn(
-              "flex min-h-[28rem] flex-col rounded-xl border border-white/10 bg-black/35 shadow-2xl",
+              "flex min-h-112 flex-col rounded-xl border border-white/10 bg-black/45 shadow-2xl",
               panel !== "chat" && "hidden lg:flex",
             )}
           >
-            <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
+            <div className="flex items-center justify-between gap-3 border-b border-white/10 px-4 py-2.5">
               <p className="font-blueprint text-ink-dim text-[0.65rem] uppercase">
                 {online.length === 0
                   ? "Nobody else around right now"
                   : `${online.length} other dealer${online.length === 1 ? "" : "s"} around`}
               </p>
-              <p className="font-blueprint text-ink-dim/60 text-[0.6rem] uppercase">
-                Names are fake. Organisers can see everything. Messages purge
-                after 3 hours.
+              <p className="font-blueprint text-ink-dim/60 flex items-center gap-2 text-[0.6rem] uppercase">
+                <span
+                  aria-hidden
+                  className="market-rec inline-block h-2 w-2 rounded-full bg-[#e0312e]"
+                />
+                Rec · Names are fake. Organisers see everything. Purged after 3h.
               </p>
             </div>
 
             <ul
               ref={listRef}
               onScroll={onListScroll}
-              className="no-scrollbar flex h-[52vh] min-h-[20rem] flex-col gap-4 overflow-y-auto px-2 py-4 lg:h-[56vh]"
+              className="no-scrollbar flex h-[52vh] min-h-80 flex-col gap-4 overflow-y-auto px-2 py-4 lg:h-[56vh]"
             >
               {messages.length === 0 && (
                 <li className="font-main text-ink-dim m-auto px-6 text-center text-sm">
@@ -499,9 +600,9 @@ export default function MarketRoom({ initial }: { initial: Room }) {
                   placeholder={
                     asOffer
                       ? "Class B for a servo and a bag of chips…"
-                      : "Say it quietly…"
+                      : "Keep your voice down…"
                   }
-                  className="font-main text-ink placeholder:text-ink-dim/60 max-h-32 min-h-11 flex-1 resize-none rounded-md border border-white/20 bg-black/40 px-3 py-2.5 text-sm outline-none focus-visible:border-[#d9a441]"
+                  className="font-main text-ink placeholder:text-ink-dim/60 max-h-32 min-h-11 flex-1 resize-none rounded-md border border-white/20 bg-black/50 px-3 py-2.5 text-sm outline-none focus-visible:border-[#d9a441]"
                 />
                 <button
                   type="button"
@@ -518,8 +619,7 @@ export default function MarketRoom({ initial }: { initial: Room }) {
                 </button>
                 <Button
                   onClick={send}
-                  disabled={isPending || !draft.trim()}
-                  loading={isPending}
+                  disabled={!draft.trim()}
                   className="font-display brick min-h-11 font-bold uppercase"
                 >
                   Send
@@ -538,17 +638,17 @@ export default function MarketRoom({ initial }: { initial: Room }) {
               panel !== "wallet" && "hidden lg:flex",
             )}
           >
-            <div className="rounded-xl border border-white/10 bg-black/35 p-4 shadow-2xl">
+            <div className="rounded-xl border border-white/10 bg-black/45 p-4 shadow-2xl">
               <Wallet
                 tickets={tickets}
                 dealers={online}
                 registered={initial.registered}
                 onHandOver={handOver}
-                busy={isPending}
+                busy={handing}
               />
             </div>
 
-            <div className="rounded-xl border border-white/10 bg-black/35 p-4 shadow-2xl">
+            <div className="rounded-xl border border-white/10 bg-black/45 p-4 shadow-2xl">
               <p className="font-blueprint text-[#d9a441] mb-3 text-xs uppercase">
                 Around right now
               </p>
