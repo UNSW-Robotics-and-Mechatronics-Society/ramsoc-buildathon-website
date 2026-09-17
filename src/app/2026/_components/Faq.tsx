@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { motion } from "motion/react";
+import { ExternalLink } from "lucide-react";
 import { FAQS, HIDDEN_FAQ } from "@/app/2026/_data/faqs";
 import { useEgg } from "@/app/2026/_components/eggs/EggProvider";
 
@@ -45,7 +46,21 @@ export default function Faq() {
                   +
                 </span>
               </summary>
-              <p className="text-ink-dim px-5 pb-4">{faq.answer}</p>
+              <div className="px-5 pb-4">
+                <p className="text-ink-dim">{faq.answer}</p>
+                {faq.link && (
+                  <a
+                    href={faq.link.href}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="text-link font-blueprint mt-3 inline-flex min-h-11 items-center gap-1.5 text-xs uppercase"
+                  >
+                    {faq.link.label}
+                    <ExternalLink size={12} aria-hidden />
+                    <span className="sr-only">(opens in a new tab)</span>
+                  </a>
+                )}
+              </div>
             </details>
           ))}
 

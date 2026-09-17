@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { ExternalLink } from "lucide-react";
 import {
+  BRIEF,
   WORKSHOP_RESOURCES,
   EXTERNAL_RESOURCES,
   TROUBLESHOOTING,
@@ -37,7 +38,9 @@ function ResourceCard({ resource }: { resource: Resource }) {
             ? "Watch"
             : resource.kind === "slides"
               ? "Open slides"
-              : "Open"}
+              : resource.kind === "brief"
+                ? "Read the brief"
+                : "Open"}
           <ExternalLink size={12} aria-hidden />
           <span className="sr-only">(opens in a new tab)</span>
         </span>
@@ -55,6 +58,12 @@ export default function Resources() {
         <p className="text-ink-dim mb-10 max-w-2xl text-lg">
           Slides and recordings for each workshop. Some are carried over from previous years and cover the same ground; 2026 material is added as each session runs.
         </p>
+
+        {/* The brief leads: it is what every team is actually working to. */}
+        <h3 className="text-ink mb-4">The brief</h3>
+        <div className="mb-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <ResourceCard resource={BRIEF} />
+        </div>
 
         <h3 className="text-ink mb-4">Workshop material</h3>
         <div className="mb-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">

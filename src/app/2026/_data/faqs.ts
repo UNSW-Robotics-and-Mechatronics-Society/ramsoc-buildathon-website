@@ -1,6 +1,10 @@
+import { BRIEF } from "@/app/2026/_data/resources";
+
 export type Faq = {
   question: string;
   answer: string;
+  /** Optional call to action under the answer, for answers that point somewhere. */
+  link?: { label: string; href: string };
 };
 
 /**
@@ -22,7 +26,8 @@ export const FAQS: Faq[] = [
   {
     question: "What is the brief?",
     answer:
-      "The brief is announced on kick-off night in Week 1, and it changes each year. It is deliberately wide: you pick the problem you want to solve, and the judges look at how well your build actually addresses it. Past entries have ranged from water quality monitors and solar trackers to accessibility devices and bushfire sensors.",
+      "The 2026 brief is out, and it is available to read now. It sets three problem statements around environmental monitoring and remediation. It is deliberately wide: you pick the problem you want to solve, and the judges look at how well your build actually addresses it.",
+    link: { label: "Read the brief", href: BRIEF.href },
   },
   {
     question: "Who can enter?",

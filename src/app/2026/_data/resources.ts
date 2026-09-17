@@ -4,7 +4,21 @@ export type Resource = {
   href: string;
   image: string;
   /** Drives the call to action on the card, so people know what they will get. */
-  kind: "video" | "slides" | "link";
+  kind: "video" | "slides" | "link" | "brief";
+};
+
+/**
+ * The 2026 brief, announced on kick-off night. It is the one thing every team
+ * needs, so it is both the yellow brick on the homepage and the first card in
+ * the resources section, rather than sitting in with the workshop material.
+ */
+export const BRIEF: Resource = {
+  title: "Buildathon 2026 Brief",
+  description:
+    "Three problem statements · Environmental monitoring and remediation",
+  href: "https://canva.link/wb1tavy3rujxyeb",
+  image: "/2026/brand/components.jpg",
+  kind: "brief",
 };
 
 /**

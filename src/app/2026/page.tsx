@@ -1,4 +1,5 @@
 import Hero from "@/app/2026/_components/Hero";
+import BriefCallout from "@/app/2026/_components/BriefCallout";
 import About from "@/app/2026/_components/About";
 import Timeline from "@/app/2026/_components/Timeline";
 import Resources from "@/app/2026/_components/Resources";
@@ -20,6 +21,7 @@ export default function Home() {
   return (
     <>
       <Hero />
+      <BriefCallout />
       <About />
 
       <section className="pb-4 md:pb-8">
