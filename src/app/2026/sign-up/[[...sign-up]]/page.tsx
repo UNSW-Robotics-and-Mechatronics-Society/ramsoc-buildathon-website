@@ -4,10 +4,8 @@ import { SignUp } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Path from "@/app/path";
 import { getLiveRegistrationStatus } from "@/app/2026/_actions/appConfig";
-import {
-  SIGNUP_INVITE_COOKIE,
-  validateInviteToken,
-} from "@/app/2026/admin/_utils/invites";
+import { SIGNUP_INVITE_COOKIE } from "@/app/2026/admin/_utils/invites";
+import { validateInviteToken } from "@/app/2026/admin/_utils/invitesServer";
 
 export const metadata = { title: "Create an account" };
 
