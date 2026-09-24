@@ -10,6 +10,7 @@ import { cn } from "@/app/_utils/cn";
 const tabs = [
   { label: "Teams", href: Path[2026].AdminTeams },
   { label: "Individuals", href: Path[2026].AdminIndividuals },
+  { label: "Invites", href: Path[2026].AdminInvites },
   { label: "Tasks", href: Path[2026].AdminTasks },
   { label: "Timeline", href: Path[2026].AdminTimeline },
   { label: "Market", href: Path[2026].AdminMarket },
