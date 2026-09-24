@@ -41,6 +41,19 @@ export type SignupInvite = {
   revoked_at: string | null;
 };
 
+/**
+ * A Clerk account with no Buildathon profile yet: someone who signed up but
+ * never got through onboarding. `invited` is true when a live late sign-up
+ * invite exists for their email, so the admin can see who is already covered.
+ */
+export type UnregisteredAccount = {
+  clerk_user_id: string;
+  email: string;
+  name: string;
+  created_at: string;
+  invited: boolean;
+};
+
 /** A row of `admin_tasks`, as shown on the Tasks tab. */
 export type AdminTask = {
   id: string;

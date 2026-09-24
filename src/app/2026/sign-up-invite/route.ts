@@ -3,9 +3,11 @@ import {
   SIGNUP_INVITE_COOKIE,
   SIGNUP_INVITE_COOKIE_MAX_AGE,
   SIGNUP_INVITE_COOKIE_PATH,
+} from "@/app/2026/admin/_utils/invites";
+import {
   markInviteOpened,
   validateInviteToken,
-} from "@/app/2026/admin/_utils/invites";
+} from "@/app/2026/admin/_utils/invitesServer";
 import Path from "@/app/path";
 
 /**

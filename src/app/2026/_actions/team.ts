@@ -9,7 +9,11 @@ import {
   PAID_TEAM_CAP,
 } from "@/app/2026/_data/teamConfig";
 import { getLiveRegistrationStatus } from "@/app/2026/_actions/appConfig";
-import type { TeamWithMembers, TeamBrowseItem } from "@/app/_types/registration";
+import { isInvitedLateEntrant } from "@/app/2026/admin/_utils/invitesServer";
+import type {
+  TeamWithMembers,
+  TeamBrowseItem,
+} from "@/app/_types/registration";
 
 /**
  * Buildathon runs a single division, there is no standard/open split, no
@@ -27,10 +31,34 @@ const PG_UNIQUE_VIOLATION = "23505";
 
 // Basic profanity word list for team name censorship.
 const BLOCKED_WORDS = [
-  "fuck", "shit", "ass", "bitch", "dick", "cock", "pussy", "cunt",
-  "damn", "bastard", "slut", "whore", "nigger", "nigga", "faggot",
-  "retard", "rape", "nazi", "hitler", "penis", "vagina", "porn",
-  "sex", "hentai", "cum", "dildo", "anal", "anus",
+  "fuck",
+  "shit",
+  "ass",
+  "bitch",
+  "dick",
+  "cock",
+  "pussy",
+  "cunt",
+  "damn",
+  "bastard",
+  "slut",
+  "whore",
+  "nigger",
+  "nigga",
+  "faggot",
+  "retard",
+  "rape",
+  "nazi",
+  "hitler",
+  "penis",
+  "vagina",
+  "porn",
+  "sex",
+  "hentai",
+  "cum",
+  "dildo",
+  "anal",
+  "anus",
 ];
 
 function containsProfanity(name: string): boolean {
@@ -93,6 +121,9 @@ async function getProfileId(userId: string): Promise<string | undefined> {
 async function registrationClosedError(): Promise<string | null> {
   const status = await getLiveRegistrationStatus();
   if (status.isOpen) return null;
+  // A late entrant the organisers invited may still form or join a team while
+  // the public window is shut — the invite is their pass through it.
+  if (await isInvitedLateEntrant()) return null;
   return status.isUpcoming
     ? "Registration hasn't opened yet"
     : "Registration has closed";

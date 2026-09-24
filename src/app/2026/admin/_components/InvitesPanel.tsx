@@ -114,8 +114,10 @@ function InviteRow({
 
 export default function InvitesPanel({
   initialInvites,
+  loadError,
 }: {
   initialInvites: SignupInvite[];
+  loadError?: string | null;
 }) {
   const router = useRouter();
   const emailId = useId();
@@ -157,6 +159,13 @@ export default function InvitesPanel({
 
   return (
     <div className="flex max-w-3xl flex-col gap-5">
+      {loadError && (
+        <Alert tone="error">
+          Could not read the invites table. If this is the first deploy of this
+          feature, run the <code>008_signup_invites.sql</code> migration against
+          Supabase, then reload. ({loadError})
+        </Alert>
+      )}
       <PanelSection
         title="Issue a late sign-up invite"
         description="Registration is otherwise closed. This creates a single-person link that unlocks the sign-up page for one late entrant, valid for 72 hours. Send it to them directly — it is not linked anywhere on the site. Onboarding, teams and payment work exactly as they do during the normal window."

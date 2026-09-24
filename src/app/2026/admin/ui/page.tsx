@@ -1147,7 +1147,20 @@ export default function AdminUiGalleryPage() {
               title="IndividualsTable"
               description="Every registered entrant, with their cohort, institution and team. Two of these mock entrants have no team, which is what organisers use this tab to fix."
             >
-              <IndividualsTable profiles={adminProfiles} teams={adminTeams} />
+              <IndividualsTable
+                profiles={adminProfiles}
+                teams={adminTeams}
+                unregistered={[
+                  {
+                    clerk_user_id: "user_mock_late",
+                    email: "late.entrant@student.unsw.edu.au",
+                    name: "Late Entrant",
+                    created_at: "2026-09-16T09:00:00+10:00",
+                    invited: false,
+                  },
+                ]}
+                unregisteredError={null}
+              />
             </PanelSection>
 
             <PanelSection
