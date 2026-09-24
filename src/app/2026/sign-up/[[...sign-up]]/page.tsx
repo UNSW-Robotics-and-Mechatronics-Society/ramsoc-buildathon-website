@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { cookies } from "next/headers";
 import { SignUp } from "@clerk/nextjs";
 import { ArrowLeft } from "lucide-react";
 import Path from "@/app/path";
 import { getLiveRegistrationStatus } from "@/app/2026/_actions/appConfig";
-import { SIGNUP_INVITE_COOKIE } from "@/app/2026/admin/_utils/invites";
-import { validateInviteToken } from "@/app/2026/admin/_utils/invitesServer";
+import { isInvitedLateEntrant } from "@/app/2026/admin/_utils/invitesServer";
 
 export const metadata = { title: "Create an account" };
 
@@ -25,13 +23,11 @@ export default async function SignUpPage() {
   const status = await getLiveRegistrationStatus();
 
   // Only consult the invite once the public window is closed: while it is open,
-  // nobody needs one.
-  const cookieStore = await cookies();
-  const invite = status.isOpen
-    ? null
-    : await validateInviteToken(cookieStore.get(SIGNUP_INVITE_COOKIE)?.value);
+  // nobody needs one. An invite counts via the cookie from their link, or, if
+  // they are already signed in, a live invite for their Clerk email.
+  const invite = status.isOpen ? false : await isInvitedLateEntrant();
 
-  const allowed = status.isOpen || invite !== null;
+  const allowed = status.isOpen || invite;
 
   return (
     <div className="flex min-h-[80vh] flex-col items-center justify-center px-4 py-12">
