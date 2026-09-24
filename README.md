@@ -110,6 +110,19 @@ separate from Clerk. It sets an httpOnly `admin_session` cookie scoped to
 `/2026/admin` for 24 hours. Middleware guards navigation and every server
 action re-checks the cookie independently.
 
+### Late sign-up invites
+
+Public sign-up (`/2026/sign-up`) is gated on the registration window: open
+while registration is, closed otherwise, and never linked from the public nav.
+When registration has closed, organisers can still let a specific late entrant
+in from the **Invites** tab: entering an email issues a single-person link
+(`/2026/sign-up-invite?token=…`, a row in `signup_invites`) that unlocks the
+sign-up page for 72 hours. Invites are tied to an email, expire, are revocable,
+and are listed in the admin console, so late entry stays in the organisers'
+hands and on the record — there is no unlogged back door. It only unlocks
+account creation; joining a team is still done through the normal flow or the
+admin dashboard.
+
 ## Theme
 
 Blueprint + LEGO: a deep drafting-blue ground ruled with a faint white grid,

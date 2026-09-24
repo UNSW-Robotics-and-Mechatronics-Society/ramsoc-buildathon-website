@@ -9,9 +9,13 @@ const Path = {
     Sponsors: "/2026/#sponsors",
     Support: "/2026/#support",
 
-    // No SignUp route: registration is closed for 2026, so accounts are not
-    // created from the site any more. Existing accounts sign in as normal.
     SignIn: "/2026/sign-in",
+    // Sign-up is gated, not public: it opens during the registration window,
+    // and otherwise only for someone arriving through an admin-issued invite
+    // (SignUpInvite validates the token and unlocks the page). It is not linked
+    // from the public nav — organisers hand out the invite link directly.
+    SignUp: "/2026/sign-up",
+    SignUpInvite: "/2026/sign-up-invite",
     Onboarding: "/2026/onboarding",
     Dashboard: "/2026/dashboard",
     Payment: "/2026/dashboard/payment",
@@ -23,6 +27,7 @@ const Path = {
     EggRambo: "/2026/rambo",
 
     Admin: "/2026/admin",
+    AdminInvites: "/2026/admin/invites",
     AdminTeams: "/2026/admin/teams",
     AdminIndividuals: "/2026/admin/individuals",
     AdminTasks: "/2026/admin/tasks",

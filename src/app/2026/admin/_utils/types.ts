@@ -24,6 +24,23 @@ export type AdminAppConfig = {
   updated_at: string | null;
 };
 
+/**
+ * A late sign-up invite, as shown on the Invites tab. Timestamps are ISO
+ * strings so they cross the server/client boundary unambiguously. `token` is
+ * carried to the client so the admin can copy the link, it is only ever exposed
+ * behind the admin password.
+ */
+export type SignupInvite = {
+  id: string;
+  email: string;
+  token: string;
+  note: string | null;
+  created_at: string;
+  expires_at: string;
+  accepted_at: string | null;
+  revoked_at: string | null;
+};
+
 /** A row of `admin_tasks`, as shown on the Tasks tab. */
 export type AdminTask = {
   id: string;
