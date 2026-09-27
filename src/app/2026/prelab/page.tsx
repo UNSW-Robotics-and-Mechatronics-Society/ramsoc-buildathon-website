@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Prelab from "./_components/Prelab";
+import Prelab from "./_components/walnut";
 
 export const metadata: Metadata = {
-  title: "prelab",
+  title: "walnut",
   robots: { index: false, follow: false },
 };
 
