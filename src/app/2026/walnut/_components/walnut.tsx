@@ -15,7 +15,7 @@ export default function Prelab() {
       <h1 className="text-3xl font-bold sm:text-4xl">
         🎉 Congrats!
       </h1>
-      <p className="mt-3 max-w-md text-lg text-gray-600">
+      <p className="text-ink-dim mt-3 max-w-md text-lg">
         Nice work finishing the ESP32 Workshop prelab.
       </p>
       <Button
