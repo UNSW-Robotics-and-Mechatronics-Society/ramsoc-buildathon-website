@@ -25,6 +25,7 @@ const Path = {
     // Easter eggs. Not linked from anywhere, found by typing the URL.
     Egg67: "/2026/67",
     EggRambo: "/2026/rambo",
+    Prelab: "/2026/walnut",
 
     Admin: "/2026/admin",
     AdminInvites: "/2026/admin/invites",
