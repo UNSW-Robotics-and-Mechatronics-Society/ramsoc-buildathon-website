@@ -42,6 +42,11 @@ export const EGGS = {
     title: "The seventeenth question",
     blurb: "You opened every single FAQ. Nobody does that.",
   },
+  prelab: {
+    class: "C",
+    title: "ESP32 Prelab",
+    blurb: "you finished the prelab and unlocked a reward",
+  },
   typewriter: {
     class: "C",
     title: "Read the fine print",
